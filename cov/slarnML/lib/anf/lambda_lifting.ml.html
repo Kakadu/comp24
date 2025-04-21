@@ -551,7 +551,7 @@ open Res
 let new_anon = ma<span data-count="3">p</span> (fun (ast, prog, env, num) -&gt; <span data-count="15">R</span>esult (ast, prog, env, num + 1))
 
 let get_anon_name =
-  ma<span data-count="3">p</span> (fun (_, _, _, num) -&gt; <span data-count="15">R</span>esult (String.conca<span data-count="15">t</span> "$" [ "anon"; string_of_in<span data-count="15">t</span> num ]))
+  ma<span data-count="3">p</span> (fun (_, _, _, num) -&gt; <span data-count="15">R</span>esult (String.conca<span data-count="15">t</span> "_" [ "anon"; string_of_in<span data-count="15">t</span> num ]))
 ;;
 
 let get_name id _ =

@@ -1705,15 +1705,15 @@ let ll_ok n res expected =
 ;;
 
 let ll1 =
-  [ LFun ("anon$1", [ "n"; "k"; "n"; "m" ], LMul (LId "k", LMul (LId "m", LId "n")))
+  [ LFun ("anon_1", [ "n"; "k"; "n"; "m" ], LMul (LId "k", LMul (LId "m", LId "n")))
   ; LFun
       ( "fack"
       , [ "n"; "k" ]
       , LIf
           ( LLte (LId "n", LConst (CInt 1))
           , LApp (LId "n", [ LSub (LId "n", LConst (CInt 1)) ])
-          , LApp (LApp (LApp (LId "anon$1", [ LId "n" ]), [ LId "k" ]), [ LId "n" ]) ) )
-  ; LFun ("anon$2", [ "n"; "x" ], LId "x")
+          , LApp (LApp (LApp (LId "anon_1", [ LId "n" ]), [ LId "k" ]), [ LId "n" ]) ) )
+  ; LFun ("anon_2", [ "n"; "x" ], LId "x")
   ; LFun
       ( "fac"
       , [ "n" ]
@@ -1722,9 +1722,9 @@ let ll1 =
           , LIf
               ( LLte (LId "n", LConst (CInt 1))
               , LApp (LId "n", [ LSub (LId "n", LConst (CInt 1)) ])
-              , LApp (LApp (LApp (LId "anon$1", [ LId "n" ]), [ LId "k" ]), [ LId "n" ])
+              , LApp (LApp (LApp (LId "anon_1", [ LId "n" ]), [ LId "k" ]), [ LId "n" ])
               )
-          , LApp (LApp (LId "fack", [ LId "n" ]), [ LApp (LId "anon$2", [ LId "n" ]) ]) )
+          , LApp (LApp (LId "fack", [ LId "n" ]), [ LApp (LId "anon_2", [ LId "n" ]) ]) )
       )
   ]
 ;;
@@ -1766,19 +1766,19 @@ ll_o<span data-count="3">k</span> "ll_2" (lambda_liftin<span data-count="3">g</s
 
 let ll3 =
   [ LFun
-      ( "anon$1"
+      ( "anon_1"
       , [ "c"; "a"; "b"; "x" ]
       , LMul (LId "x", LApp (LId "a", [ LMul (LId "c", LId "b") ])) )
   ; LFun
       ( "h"
       , [ "c"; "a"; "b" ]
-      , LApp (LApp (LApp (LId "anon$1", [ LId "c" ]), [ LId "a" ]), [ LId "b" ]) )
+      , LApp (LApp (LApp (LId "anon_1", [ LId "c" ]), [ LId "a" ]), [ LId "b" ]) )
   ; LFun
       ( "g"
       , [ "a"; "b"; "c" ]
       , LIn
           ( "h"
-          , LApp (LApp (LApp (LId "anon$1", [ LId "c" ]), [ LId "a" ]), [ LId "b" ])
+          , LApp (LApp (LApp (LId "anon_1", [ LId "c" ]), [ LId "a" ]), [ LId "b" ])
           , LApp
               ( LApp (LApp (LApp (LId "h", [ LId "c" ]), [ LId "a" ]), [ LId "b" ])
               , [ LId "a" ] ) ) )
@@ -1789,7 +1789,7 @@ let ll3 =
           ( "g"
           , LIn
               ( "h"
-              , LApp (LApp (LApp (LId "anon$1", [ LId "c" ]), [ LId "a" ]), [ LId "b" ])
+              , LApp (LApp (LApp (LId "anon_1", [ LId "c" ]), [ LId "a" ]), [ LId "b" ])
               , LApp
                   ( LApp (LApp (LApp (LId "h", [ LId "c" ]), [ LId "a" ]), [ LId "b" ])
                   , [ LId "a" ] ) )
@@ -1852,19 +1852,19 @@ let ll5 =
 ll_o<span data-count="3">k</span> "ll_5" (lambda_liftin<span data-count="3">g</span> cc5) ll5
 
 let ll6 =
-  [ LFun ("anon$1", [ "a"; "x" ], LId "x")
-  ; LFun ("g", [ "a" ], LApp (LId "anon$1", [ LId "a" ]))
-  ; LFun ("anon$2", [ "a"; "x" ], LMul (LId "a", LId "x"))
-  ; LFun ("h", [ "a" ], LApp (LId "anon$2", [ LId "a" ]))
+  [ LFun ("anon_1", [ "a"; "x" ], LId "x")
+  ; LFun ("g", [ "a" ], LApp (LId "anon_1", [ LId "a" ]))
+  ; LFun ("anon_2", [ "a"; "x" ], LMul (LId "a", LId "x"))
+  ; LFun ("h", [ "a" ], LApp (LId "anon_2", [ LId "a" ]))
   ; LFun
       ( "f"
       , [ "a" ]
       , LIn
           ( "g"
-          , LApp (LId "anon$1", [ LId "a" ])
+          , LApp (LId "anon_1", [ LId "a" ])
           , LIn
               ( "h"
-              , LApp (LId "anon$2", [ LId "a" ])
+              , LApp (LId "anon_2", [ LId "a" ])
               , LAdd
                   ( LApp (LApp (LId "g", [ LId "a" ]), [ LId "a" ])
                   , LApp (LApp (LId "h", [ LId "a" ]), [ LId "a" ]) ) ) ) )
@@ -1900,84 +1900,84 @@ let anf_ok n ll expected =
 
 let anf1 =
   [ AFun
-      ( "anon$1"
+      ( "anon_1"
       , [ "n"; "k"; "n"; "m" ]
       , ALet
-          ( "anf_op#1"
+          ( "anf_op_1"
           , AMul (AId "m", AId "n")
           , ALet
-              ( "anf_op#2"
-              , AMul (AId "k", AId "anf_op#1")
-              , ACExpr (CImmExpr (AId "anf_op#2")) ) ) )
+              ( "anf_op_2"
+              , AMul (AId "k", AId "anf_op_1")
+              , ACExpr (CImmExpr (AId "anf_op_2")) ) ) )
   ; AFun
       ( "fack"
       , [ "n"; "k" ]
       , ALet
-          ( "anf_op#3"
+          ( "anf_op_3"
           , ALte (AId "n", AInt 1)
           , ALet
-              ( "anf_if#4"
+              ( "anf_if_4"
               , AIf
-                  ( AId "anf_op#3"
+                  ( AId "anf_op_3"
                   , ALet
-                      ( "anf_op#5"
+                      ( "anf_op_5"
                       , ASub (AId "n", AInt 1)
                       , ALet
-                          ( "anf_app#6"
-                          , AApp (AId "n", [ AId "anf_op#5" ])
-                          , ACExpr (CImmExpr (AId "anf_app#6")) ) )
+                          ( "anf_app_6"
+                          , AApp (AId "n", [ AId "anf_op_5" ])
+                          , ACExpr (CImmExpr (AId "anf_app_6")) ) )
                   , ALet
-                      ( "anf_app#7"
-                      , AApp (AId "anon$1", [ AId "n" ])
+                      ( "anf_app_7"
+                      , AApp (AId "anon_1", [ AId "n" ])
                       , ALet
-                          ( "anf_app#8"
-                          , AApp (AId "anf_app#7", [ AId "k" ])
+                          ( "anf_app_8"
+                          , AApp (AId "anf_app_7", [ AId "k" ])
                           , ALet
-                              ( "anf_app#9"
-                              , AApp (AId "anf_app#8", [ AId "n" ])
-                              , ACExpr (CImmExpr (AId "anf_app#9")) ) ) ) )
-              , ACExpr (CImmExpr (AId "anf_if#4")) ) ) )
-  ; AFun ("anon$2", [ "n"; "x" ], ACExpr (CImmExpr (AId "x")))
+                              ( "anf_app_9"
+                              , AApp (AId "anf_app_8", [ AId "n" ])
+                              , ACExpr (CImmExpr (AId "anf_app_9")) ) ) ) )
+              , ACExpr (CImmExpr (AId "anf_if_4")) ) ) )
+  ; AFun ("anon_2", [ "n"; "x" ], ACExpr (CImmExpr (AId "x")))
   ; AFun
       ( "fac"
       , [ "n" ]
       , ALet
-          ( "anf_op#10"
+          ( "anf_op_10"
           , ALte (AId "n", AInt 1)
           , ALet
-              ( "anf_if#11"
+              ( "anf_if_11"
               , AIf
-                  ( AId "anf_op#10"
+                  ( AId "anf_op_10"
                   , ALet
-                      ( "anf_op#12"
+                      ( "anf_op_12"
                       , ASub (AId "n", AInt 1)
                       , ALet
-                          ( "anf_app#13"
-                          , AApp (AId "n", [ AId "anf_op#12" ])
-                          , ACExpr (CImmExpr (AId "anf_app#13")) ) )
+                          ( "anf_app_13"
+                          , AApp (AId "n", [ AId "anf_op_12" ])
+                          , ACExpr (CImmExpr (AId "anf_app_13")) ) )
                   , ALet
-                      ( "anf_app#14"
-                      , AApp (AId "anon$1", [ AId "n" ])
+                      ( "anf_app_14"
+                      , AApp (AId "anon_1", [ AId "n" ])
                       , ALet
-                          ( "anf_app#15"
-                          , AApp (AId "anf_app#14", [ AId "k" ])
+                          ( "anf_app_15"
+                          , AApp (AId "anf_app_14", [ AId "k" ])
                           , ALet
-                              ( "anf_app#16"
-                              , AApp (AId "anf_app#15", [ AId "n" ])
-                              , ACExpr (CImmExpr (AId "anf_app#16")) ) ) ) )
+                              ( "anf_app_16"
+                              , AApp (AId "anf_app_15", [ AId "n" ])
+                              , ACExpr (CImmExpr (AId "anf_app_16")) ) ) ) )
               , ALet
                   ( "fack"
-                  , CImmExpr (AId "anf_if#11")
+                  , CImmExpr (AId "anf_if_11")
                   , ALet
-                      ( "anf_app#17"
+                      ( "anf_app_17"
                       , AApp (AId "fack", [ AId "n" ])
                       , ALet
-                          ( "anf_app#18"
-                          , AApp (AId "anon$2", [ AId "n" ])
+                          ( "anf_app_18"
+                          , AApp (AId "anon_2", [ AId "n" ])
                           , ALet
-                              ( "anf_app#19"
-                              , AApp (AId "anf_app#17", [ AId "anf_app#18" ])
-                              , ACExpr (CImmExpr (AId "anf_app#19")) ) ) ) ) ) ) )
+                              ( "anf_app_19"
+                              , AApp (AId "anf_app_17", [ AId "anf_app_18" ])
+                              , ACExpr (CImmExpr (AId "anf_app_19")) ) ) ) ) ) ) )
   ]
 ;;
 
@@ -1988,74 +1988,74 @@ let anf4 =
       ( "h"
       , [ "a"; "a"; "b"; "c" ]
       , ALet
-          ( "anf_op#1"
+          ( "anf_op_1"
           , ADiv (AId "b", AId "c")
           , ALet
-              ( "anf_op#2"
-              , AMul (AId "a", AId "anf_op#1")
-              , ACExpr (CImmExpr (AId "anf_op#2")) ) ) )
+              ( "anf_op_2"
+              , AMul (AId "a", AId "anf_op_1")
+              , ACExpr (CImmExpr (AId "anf_op_2")) ) ) )
   ; AFun
       ( "g"
       , [ "a"; "b" ]
       , ALet
-          ( "anf_op#3"
+          ( "anf_op_3"
           , ADiv (AId "b", AId "c")
           , ALet
-              ( "anf_op#4"
-              , AMul (AId "a", AId "anf_op#3")
+              ( "anf_op_4"
+              , AMul (AId "a", AId "anf_op_3")
               , ALet
                   ( "h"
-                  , CImmExpr (AId "anf_op#4")
+                  , CImmExpr (AId "anf_op_4")
                   , ALet
-                      ( "anf_app#5"
+                      ( "anf_app_5"
                       , AApp (AId "h", [ AId "a" ])
                       , ALet
-                          ( "anf_app#6"
-                          , AApp (AId "anf_app#5", [ AId "a" ])
+                          ( "anf_app_6"
+                          , AApp (AId "anf_app_5", [ AId "a" ])
                           , ALet
-                              ( "anf_app#7"
-                              , AApp (AId "anf_app#6", [ AInt 2 ])
+                              ( "anf_app_7"
+                              , AApp (AId "anf_app_6", [ AInt 2 ])
                               , ALet
-                                  ( "anf_app#8"
-                                  , AApp (AId "anf_app#7", [ AInt 3 ])
-                                  , ACExpr (CImmExpr (AId "anf_app#8")) ) ) ) ) ) ) ) )
+                                  ( "anf_app_8"
+                                  , AApp (AId "anf_app_7", [ AInt 3 ])
+                                  , ACExpr (CImmExpr (AId "anf_app_8")) ) ) ) ) ) ) ) )
   ; AFun
       ( "f"
       , [ "a" ]
       , ALet
-          ( "anf_op#9"
+          ( "anf_op_9"
           , ADiv (AId "b", AId "c")
           , ALet
-              ( "anf_op#10"
-              , AMul (AId "a", AId "anf_op#9")
+              ( "anf_op_10"
+              , AMul (AId "a", AId "anf_op_9")
               , ALet
                   ( "h"
-                  , CImmExpr (AId "anf_op#10")
+                  , CImmExpr (AId "anf_op_10")
                   , ALet
-                      ( "anf_app#11"
+                      ( "anf_app_11"
                       , AApp (AId "h", [ AId "a" ])
                       , ALet
-                          ( "anf_app#12"
-                          , AApp (AId "anf_app#11", [ AId "a" ])
+                          ( "anf_app_12"
+                          , AApp (AId "anf_app_11", [ AId "a" ])
                           , ALet
-                              ( "anf_app#13"
-                              , AApp (AId "anf_app#12", [ AInt 2 ])
+                              ( "anf_app_13"
+                              , AApp (AId "anf_app_12", [ AInt 2 ])
                               , ALet
-                                  ( "anf_app#14"
-                                  , AApp (AId "anf_app#13", [ AInt 3 ])
+                                  ( "anf_app_14"
+                                  , AApp (AId "anf_app_13", [ AInt 3 ])
                                   , ALet
                                       ( "g"
-                                      , CImmExpr (AId "anf_app#14")
+                                      , CImmExpr (AId "anf_app_14")
                                       , ALet
-                                          ( "anf_op#15"
+                                          ( "anf_op_15"
                                           , AAdd (AInt 1, AInt 0)
                                           , ALet
-                                              ( "anf_app#16"
-                                              , AApp (AId "g", [ AId "anf_op#15" ])
+                                              ( "anf_app_16"
+                                              , AApp (AId "g", [ AId "anf_op_15" ])
                                               , ALet
-                                                  ( "anf_app#17"
-                                                  , AApp (AId "anf_app#16", [ AId "a" ])
-                                                  , ACExpr (CImmExpr (AId "anf_app#17"))
+                                                  ( "anf_app_17"
+                                                  , AApp (AId "anf_app_16", [ AId "a" ])
+                                                  , ACExpr (CImmExpr (AId "anf_app_17"))
                                                   ) ) ) ) ) ) ) ) ) ) ) )
   ]
 ;;
@@ -2066,42 +2066,42 @@ let anf5 =
   [ AFun
       ( "g"
       , [ "a"; "b" ]
-      , ALet ("anf_op#1", ADiv (AId "a", AId "b"), ACExpr (CImmExpr (AId "anf_op#1"))) )
+      , ALet ("anf_op_1", ADiv (AId "a", AId "b"), ACExpr (CImmExpr (AId "anf_op_1"))) )
   ; AFun
       ( "h"
       , [ "a"; "c" ]
-      , ALet ("anf_op#2", AMul (AId "a", AId "c"), ACExpr (CImmExpr (AId "anf_op#2"))) )
+      , ALet ("anf_op_2", AMul (AId "a", AId "c"), ACExpr (CImmExpr (AId "anf_op_2"))) )
   ; AFun
       ( "f"
       , [ "a" ]
       , ALet
-          ( "anf_op#3"
+          ( "anf_op_3"
           , ADiv (AId "a", AId "b")
           , ALet
               ( "g"
-              , CImmExpr (AId "anf_op#3")
+              , CImmExpr (AId "anf_op_3")
               , ALet
-                  ( "anf_op#4"
+                  ( "anf_op_4"
                   , AMul (AId "a", AId "c")
                   , ALet
                       ( "h"
-                      , CImmExpr (AId "anf_op#4")
+                      , CImmExpr (AId "anf_op_4")
                       , ALet
-                          ( "anf_app#5"
+                          ( "anf_app_5"
                           , AApp (AId "h", [ AId "a" ])
                           , ALet
-                              ( "anf_app#6"
-                              , AApp (AId "anf_app#5", [ AInt 1 ])
+                              ( "anf_app_6"
+                              , AApp (AId "anf_app_5", [ AInt 1 ])
                               , ALet
-                                  ( "anf_app#7"
+                                  ( "anf_app_7"
                                   , AApp (AId "g", [ AId "a" ])
                                   , ALet
-                                      ( "anf_app#8"
-                                      , AApp (AId "anf_app#7", [ AInt 2 ])
+                                      ( "anf_app_8"
+                                      , AApp (AId "anf_app_7", [ AInt 2 ])
                                       , ALet
-                                          ( "anf_op#9"
-                                          , AAdd (AId "anf_app#6", AId "anf_app#8")
-                                          , ACExpr (CImmExpr (AId "anf_op#9")) ) ) ) ) )
+                                          ( "anf_op_9"
+                                          , AAdd (AId "anf_app_6", AId "anf_app_8")
+                                          , ACExpr (CImmExpr (AId "anf_op_9")) ) ) ) ) )
                       ) ) ) ) )
   ]
 ;;
@@ -2109,56 +2109,56 @@ let anf5 =
 let%test _ = <span data-count="1">a</span>nf_ok "anf_5" ll5 anf5
 
 let anf6 =
-  [ AFun ("anon$1", [ "a"; "x" ], ACExpr (CImmExpr (AId "x")))
+  [ AFun ("anon_1", [ "a"; "x" ], ACExpr (CImmExpr (AId "x")))
   ; AFun
       ( "g"
       , [ "a" ]
       , ALet
-          ( "anf_app#1"
-          , AApp (AId "anon$1", [ AId "a" ])
-          , ACExpr (CImmExpr (AId "anf_app#1")) ) )
+          ( "anf_app_1"
+          , AApp (AId "anon_1", [ AId "a" ])
+          , ACExpr (CImmExpr (AId "anf_app_1")) ) )
   ; AFun
-      ( "anon$2"
+      ( "anon_2"
       , [ "a"; "x" ]
-      , ALet ("anf_op#2", AMul (AId "a", AId "x"), ACExpr (CImmExpr (AId "anf_op#2"))) )
+      , ALet ("anf_op_2", AMul (AId "a", AId "x"), ACExpr (CImmExpr (AId "anf_op_2"))) )
   ; AFun
       ( "h"
       , [ "a" ]
       , ALet
-          ( "anf_app#3"
-          , AApp (AId "anon$2", [ AId "a" ])
-          , ACExpr (CImmExpr (AId "anf_app#3")) ) )
+          ( "anf_app_3"
+          , AApp (AId "anon_2", [ AId "a" ])
+          , ACExpr (CImmExpr (AId "anf_app_3")) ) )
   ; AFun
       ( "f"
       , [ "a" ]
       , ALet
-          ( "anf_app#4"
-          , AApp (AId "anon$1", [ AId "a" ])
+          ( "anf_app_4"
+          , AApp (AId "anon_1", [ AId "a" ])
           , ALet
               ( "g"
-              , CImmExpr (AId "anf_app#4")
+              , CImmExpr (AId "anf_app_4")
               , ALet
-                  ( "anf_app#5"
-                  , AApp (AId "anon$2", [ AId "a" ])
+                  ( "anf_app_5"
+                  , AApp (AId "anon_2", [ AId "a" ])
                   , ALet
                       ( "h"
-                      , CImmExpr (AId "anf_app#5")
+                      , CImmExpr (AId "anf_app_5")
                       , ALet
-                          ( "anf_app#6"
+                          ( "anf_app_6"
                           , AApp (AId "g", [ AId "a" ])
                           , ALet
-                              ( "anf_app#7"
-                              , AApp (AId "anf_app#6", [ AId "a" ])
+                              ( "anf_app_7"
+                              , AApp (AId "anf_app_6", [ AId "a" ])
                               , ALet
-                                  ( "anf_app#8"
+                                  ( "anf_app_8"
                                   , AApp (AId "h", [ AId "a" ])
                                   , ALet
-                                      ( "anf_app#9"
-                                      , AApp (AId "anf_app#8", [ AId "a" ])
+                                      ( "anf_app_9"
+                                      , AApp (AId "anf_app_8", [ AId "a" ])
                                       , ALet
-                                          ( "anf_op#10"
-                                          , AAdd (AId "anf_app#7", AId "anf_app#9")
-                                          , ACExpr (CImmExpr (AId "anf_op#10")) ) ) ) ) )
+                                          ( "anf_op_10"
+                                          , AAdd (AId "anf_app_7", AId "anf_app_9")
+                                          , ACExpr (CImmExpr (AId "anf_op_10")) ) ) ) ) )
                       ) ) ) ) )
   ]
 ;;

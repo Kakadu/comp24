@@ -241,7 +241,7 @@ let clear_free _ =
 
 let get_name name =
   <span data-count="55">l</span>et num = next_free () in
-  <span data-count="55">S</span>tring.concat "" [ name; "#"; string_of_in<span data-count="55">t</span> num ]
+  <span data-count="55">S</span>tring.concat "" [ name; "_"; string_of_in<span data-count="55">t</span> num ]
 ;;
 
 let rec anf_expr e expr_with_hole =

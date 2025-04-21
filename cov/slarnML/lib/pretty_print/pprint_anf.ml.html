@@ -266,7 +266,7 @@ let rec pp_anf_aexpr tab ae =
   | <span data-count="0">A</span>Let (id, e1, e2) -&gt;
     concat
       ""
-      [ "(let "
+      [ "let "
       ; id
       ; "="
       ; pp_anf_cexp<span data-count="0">r</span> next_tab e1
@@ -275,14 +275,14 @@ let rec pp_anf_aexpr tab ae =
       ; "in\n"
       ; tab
       ; pp_anf_aexp<span data-count="0">r</span> tab e2
-      ; ")"
+      ; ""
       ]
   | <span data-count="0">A</span>CExpr e -&gt; pp_anf_cexpr tab e
 ;;
 
 let pp_anf_afun = function
   | <span data-count="0">A</span>Fun (id, args, e) -&gt;
-    concat "" [ "(fun "; id; "("; conca<span data-count="0">t</span> " " args; ")-&gt;\n\t"; pp_anf_aexp<span data-count="0">r</span> "\t" e; "\n)" ]
+    concat "" [ "let "; id; " "; conca<span data-count="0">t</span> " " args; "=\n\t"; pp_anf_aexp<span data-count="0">r</span> "\t" e; "\n" ]
 ;;
 </code></pre>
       </div>
