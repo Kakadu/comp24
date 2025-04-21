@@ -141,16 +141,6 @@ let rec closure_conversion ?(env = []) ?(prt_args = []) = function
   | Ast.App (func, args) ->
     let func_converted = closure_conversion ~env ~prt_args func in
     let args_converted = List.map (closure_conversion ~env ~prt_args) args in
-    (* let prt_args =
-      List.map
-        (fun arg -> CId arg)
-        (match func with
-         | Ast.Id id ->
-           (match List.find_opt (fun (name, _, _, _) -> name = id) env with
-            | None -> prt_args
-            | Some (_, _, _, args) -> args)
-         | _ -> prt_args)
-    in *)
     CApp (func_converted, args_converted)
 ;;
 

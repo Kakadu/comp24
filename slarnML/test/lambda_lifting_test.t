@@ -119,7 +119,7 @@
   (fun n1(a b n)->((n-1)))
   (fun ab(a b n)->((a+b)))
   (fun fib_acc(a b n)->(if ((n=1)) then (b) else (let n1 = ((n-1) in let ab = ((a+b) in {{{fib_acc b} {{{ab a} b} n}} {{{n1 a} b} n}})))))
-  (fun fib(n)->(if ((n<2)) then (n) else (({fib (n-1)}+{fib (n-2)}))))
+  (fun fib(n)->(if ((n<2)) then (n) else ({fib ((n-1)+{fib (n-2)})})))
   (fun main()->(let () = ({print_int {{{fib_acc 0} 1} 4}} in let () = ({print_int {fib 4}} in 0))))
   $ dune exec lambda_lifting_test < manytests/typed/004manyargs.ml
   (fun wrap(f)->(if ((1=1)) then (f) else (f)))
@@ -128,7 +128,7 @@
   (fun c_0(a b c)->({print_int c}))
   (fun test3(a b c)->(let a_0 = ({print_int a} in let b_0 = ({print_int b} in let c_0 = ({print_int c} in 0)))))
   (fun test10(a b c d e f g h i j)->((((((((((a+b)+c)+d)+e)+f)+g)+h)+i)+j)))
-  (fun main()->(let rez = ({{{{{{{{{{{wrap {test10 }} 1} 10} 100} 1000} 10000} 100000} 1000000} 10000000} 100000000} 1000000000} in let () = ({print_int rez} in let temp3 = ({{{{wrap {test3 }} 1} 10} 100} in let () = ({print_int temp3} in 0))))))
+  (fun main()->(let rez = ({{{{{{{{{{{wrap {test10 }} 1} 10} 100} 1000} 10000} 100000} 1000000} 10000000} 100000000} 1000000000} in let () = ({print_int rez} in let temp2 = ({{{{wrap {test3 }} 1} 10} 100} in 0)))))
   $ dune exec lambda_lifting_test < manytests/typed/005fix.ml
   (fun fix(f x)->({{f {fix f}} x}))
   (fun fac(self n)->(if ((n<=1)) then (1) else ((n*{self (n-1)}))))

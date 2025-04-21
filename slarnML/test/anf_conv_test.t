@@ -720,15 +720,15 @@
   		) else (
   			(let anf_op#18=(n-1)
   			in
-  			(let anf_app#19=(fib anf_op#18)
+  			(let anf_op#19=(n-2)
   			in
-  			(let anf_op#20=(n-2)
+  			(let anf_app#20=(fib anf_op#19)
   			in
-  			(let anf_app#21=(fib anf_op#20)
+  			(let anf_op#21=(anf_op#18+anf_app#20)
   			in
-  			(let anf_op#22=(anf_app#19+anf_app#21)
+  			(let anf_app#22=(fib anf_op#21)
   			in
-  			anf_op#22))))))
+  			anf_app#22))))))
   	in
   	anf_if#17))
   )
@@ -855,13 +855,9 @@
   	in
   	(let anf_app#35=(anf_app#34 100)
   	in
-  	(let temp3=anf_app#35
+  	(let temp2=anf_app#35
   	in
-  	(let anf_app#36=(print_int temp3)
-  	in
-  	(let ()=anf_app#36
-  	in
-  	0)))))))))))))))))))))))
+  	0)))))))))))))))))))))
   )
   $ dune exec anf_conv_test < manytests/typed/005fix.ml
   (fun fix(f x)->

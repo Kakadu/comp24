@@ -661,31 +661,31 @@
   blt a0,t0,.tag_anf_op_16
   	li t1,1
   	sub t2,a0,t1
+  	li t3,2
+  	sub t4,a0,t3
   	sd t2,-32(s0)
+  	sd t4,-40(s0)
   	lui a0,%hi(fib)
   	addi a0,a0,%lo(fib)
-  	ld a3,-32(s0)
+  	ld a3,-40(s0)
   	li a2,1
   	li a1,1
   call part_app
-  	ld t2,-128(s0)
-  	li t1,2
-  	sub t0,t2,t1
-  	sd a0,-40(s0)
-  	sd t0,-48(s0)
+  	ld t4,-32(s0)
+  	add t3,t4,a0
+  	sd a0,-48(s0)
+  	sd t3,-56(s0)
   	lui a0,%hi(fib)
   	addi a0,a0,%lo(fib)
-  	ld a3,-48(s0)
+  	ld a3,-56(s0)
   	li a2,1
   	li a1,1
   call part_app
-  	ld t0,-40(s0)
-  	add t1,t0,a0
-  	sd a0,-56(s0)
-  	mv a0,t1
   	j .tag_anf_op_16_t
   .tag_anf_op_16:
-  	ld a0,-128(s0)
+  	ld t3,-128(s0)
+  	sd a0,-64(s0)
+  	mv a0,t3
   .tag_anf_op_16_t:
   	mv a0,a0
   	ld ra,120(sp)
@@ -907,10 +907,10 @@
   	addi sp,sp,160
   ret
   main2:
-  	addi sp,sp,-656
-  	sd ra,648(sp)
-  	sd s0,640(sp)
-  	addi s0,sp,656
+  	addi sp,sp,-624
+  	sd ra,608(sp)
+  	sd s0,600(sp)
+  	addi s0,sp,624
   	lui a0,%hi(test10)
   	addi a0,a0,%lo(test10)
   	li a2,0
@@ -1024,19 +1024,11 @@
   	li a1,0
   call part_app
   	sd a0,-184(s0)
-  	sd a0,-192(s0)
-  	lui a0,%hi(print_int)
-  	addi a0,a0,%lo(print_int)
-  	ld a3,-192(s0)
-  	li a2,1
-  	li a1,1
-  call part_app
-  	sd a0,-200(s0)
   	li t0,0
   	mv a0,t0
-  	ld ra,648(sp)
-  	ld s0,640(sp)
-  	addi sp,sp,656
+  	ld ra,608(sp)
+  	ld s0,600(sp)
+  	addi sp,sp,624
   ret
 
   $ dune exec riscv64_instr_test < manytests/typed/005fix.ml
