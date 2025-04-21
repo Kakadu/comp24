@@ -323,15 +323,15 @@ let init_args args res =
   >>= fun c_env ->
   res
   >>= (fun env ->
-      fold_right
-        (fun a r ->
-          r
-          >>= fun (offset, lst, e) ->
-          Result e
-          |> s_right_arg offset a
-          >>= fun (instr, e) -> Result (offset - 8, instr @ lst, e))
-        right
-        (Result ((r_len - 1) * 8, [], env)))
+        fold_right
+          (fun a r ->
+            r
+            >>= fun (offset, lst, e) ->
+            Result e
+            |> s_right_arg offset a
+            >>= fun (instr, e) -> Result (offset - 8, instr @ lst, e))
+          right
+          (Result ((r_len - 1) * 8, [], env)))
   >>= fun (_, right, env) ->
   fold_left
     (fun r a ->
@@ -504,24 +504,24 @@ let rec build_aexpr tag a res =
       let dflt_bnch res =
         res
         >>= (fun (instr0, reg, env) ->
-            Result ([], None, env)
-            |> build_aexpr tag e1
-            >>= fun (instr1, reg1, env) ->
-            (match reg1 with
-             | Some reg when reg <> A 0 ->
-               Result env
-               |> free_a0
-               >>= fun (instr, env) -> Result (instr @ [ Mv (A 0, reg) ], env)
-             | Some _ -> Result ([], env)
-             | _ -> Error "Error in if")
-            >>= fun (instr2, env) ->
-            Result
-              ( instr0
-                @ (Beqz (reg, get_tag_addr id) :: instr1)
-                @ instr2
-                @ [ Jmp (get_true_tag_addr id); Tag (get_tag id) ]
-              , Some (A 0)
-              , env ))
+              Result ([], None, env)
+              |> build_aexpr tag e1
+              >>= fun (instr1, reg1, env) ->
+              (match reg1 with
+               | Some reg when reg <> A 0 ->
+                 Result env
+                 |> free_a0
+                 >>= fun (instr, env) -> Result (instr @ [ Mv (A 0, reg) ], env)
+               | Some _ -> Result ([], env)
+               | _ -> Error "Error in if")
+              >>= fun (instr2, env) ->
+              Result
+                ( instr0
+                  @ (Beqz (reg, get_tag_addr id) :: instr1)
+                  @ instr2
+                  @ [ Jmp (get_true_tag_addr id); Tag (get_tag id) ]
+                , Some (A 0)
+                , env ))
         |> build_aexpr tag e2
         >>= fun (instr1, reg2, env) ->
         (match reg2 with
@@ -543,23 +543,23 @@ let rec build_aexpr tag a res =
           | Some (_, cond) ->
             res
             >>= (fun env ->
-                Result ([], None, env)
-                |> build_aexpr tag e2
-                >>= fun (instr1, reg1, env) ->
-                (match reg1 with
-                 | Some reg when reg <> A 0 ->
-                   Result env
-                   |> free_a0
-                   >>= fun (instr, env) -> Result (instr @ [ Mv (A 0, reg) ], env)
-                 | Some _ -> Result ([], env)
-                 | _ -> Error "Error in if")
-                >>= fun (instr2, env) ->
-                Result
-                  ( (cond :: instr1)
-                    @ instr2
-                    @ [ Jmp (get_true_tag_addr id); Tag (get_tag id) ]
-                  , Some (A 0)
-                  , env ))
+                  Result ([], None, env)
+                  |> build_aexpr tag e2
+                  >>= fun (instr1, reg1, env) ->
+                  (match reg1 with
+                   | Some reg when reg <> A 0 ->
+                     Result env
+                     |> free_a0
+                     >>= fun (instr, env) -> Result (instr @ [ Mv (A 0, reg) ], env)
+                   | Some _ -> Result ([], env)
+                   | _ -> Error "Error in if")
+                  >>= fun (instr2, env) ->
+                  Result
+                    ( (cond :: instr1)
+                      @ instr2
+                      @ [ Jmp (get_true_tag_addr id); Tag (get_tag id) ]
+                    , Some (A 0)
+                    , env ))
             |> build_aexpr tag e1
             >>= fun (instr1, reg2, env) ->
             (match reg2 with
