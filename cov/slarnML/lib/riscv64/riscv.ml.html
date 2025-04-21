@@ -2102,15 +2102,15 @@ let init_args args res =
   &gt;&gt;= fun c_env -&gt;
   <span data-count="0">r</span>es
   &gt;&gt;<span data-count="0">=</span> (fun env -&gt;
-      <span data-count="0">f</span>old_right
-        (fun a r -&gt;
-          <span data-count="0">r</span>
-          &gt;&gt;= fun (offset, lst, e) -&gt;
-          <span data-count="0">R</span>esult e
-          |&gt; s_right_ar<span data-count="0">g</span> offset a
-          &gt;&gt;= fun (instr, e) -&gt; <span data-count="0">R</span>esult (offset - 8, instr @ lst, e))
-        right
-        (Result ((r_len - 1) * 8, [], env)))
+        <span data-count="0">f</span>old_right
+          (fun a r -&gt;
+            <span data-count="0">r</span>
+            &gt;&gt;= fun (offset, lst, e) -&gt;
+            <span data-count="0">R</span>esult e
+            |&gt; s_right_ar<span data-count="0">g</span> offset a
+            &gt;&gt;= fun (instr, e) -&gt; <span data-count="0">R</span>esult (offset - 8, instr @ lst, e))
+          right
+          (Result ((r_len - 1) * 8, [], env)))
   &gt;&gt;= fun (_, right, env) -&gt;
   <span data-count="0">f</span>old_lef<span data-count="0">t</span>
     (fun r a -&gt;
@@ -2283,24 +2283,24 @@ let rec build_aexpr tag a res =
       let dflt_bnch res =
         <span data-count="0">r</span>es
         &gt;&gt;= (fun (instr0, reg, env) -&gt;
-            <span data-count="0">R</span>esult ([], None, env)
-            |&gt; build_aexp<span data-count="0">r</span> tag e1
-            &gt;&gt;= fun (instr1, reg1, env) -&gt;
-            <span data-count="0">(</span>match reg1 with
-             | <span data-count="0">S</span>ome reg when reg &lt;&gt; A 0 -&gt;
-               Result env
-               |&gt; free_a<span data-count="0">0</span>
-               <span data-count="0">&gt;</span>&gt;<span data-count="0">=</span> fun (instr, env) -&gt; <span data-count="0">R</span>esult (instr @ [ Mv (A 0, reg) ], env)
-             | <span data-count="0">S</span>ome _ -&gt; Result ([], env)
-             | <span data-count="0">_</span> -&gt; Error "Error in if")
-            &gt;&gt;= fun (instr2, env) -&gt;
-            <span data-count="0">R</span>esult
-              ( instr0
-                @ (Beqz (reg, get_tag_add<span data-count="0">r</span> id) :: instr1)
-                @ instr2
-                @ [ Jmp (get_true_tag_add<span data-count="0">r</span> id); Tag (get_ta<span data-count="0">g</span> id) ]
-              , Some (A 0)
-              , env ))
+              <span data-count="0">R</span>esult ([], None, env)
+              |&gt; build_aexp<span data-count="0">r</span> tag e1
+              &gt;&gt;= fun (instr1, reg1, env) -&gt;
+              <span data-count="0">(</span>match reg1 with
+               | <span data-count="0">S</span>ome reg when reg &lt;&gt; A 0 -&gt;
+                 Result env
+                 |&gt; free_a<span data-count="0">0</span>
+                 <span data-count="0">&gt;</span>&gt;<span data-count="0">=</span> fun (instr, env) -&gt; <span data-count="0">R</span>esult (instr @ [ Mv (A 0, reg) ], env)
+               | <span data-count="0">S</span>ome _ -&gt; Result ([], env)
+               | <span data-count="0">_</span> -&gt; Error "Error in if")
+              &gt;&gt;= fun (instr2, env) -&gt;
+              <span data-count="0">R</span>esult
+                ( instr0
+                  @ (Beqz (reg, get_tag_add<span data-count="0">r</span> id) :: instr1)
+                  @ instr2
+                  @ [ Jmp (get_true_tag_add<span data-count="0">r</span> id); Tag (get_ta<span data-count="0">g</span> id) ]
+                , Some (A 0)
+                , env ))
         |&gt; <span data-count="0">b</span>uild_aexp<span data-count="0">r</span> tag e2
         &gt;&gt;= fun (instr1, reg2, env) -&gt;
         <span data-count="0">(</span>match reg2 with
@@ -2322,23 +2322,23 @@ let rec build_aexpr tag a res =
           | <span data-count="0">S</span>ome (_, cond) -&gt;
             res
             &gt;&gt;= (fun env -&gt;
-                <span data-count="0">R</span>esult ([], None, env)
-                |&gt; build_aexp<span data-count="0">r</span> tag e2
-                &gt;&gt;= fun (instr1, reg1, env) -&gt;
-                <span data-count="0">(</span>match reg1 with
-                 | <span data-count="0">S</span>ome reg when reg &lt;&gt; A 0 -&gt;
-                   Result env
-                   |&gt; free_a<span data-count="0">0</span>
-                   <span data-count="0">&gt;</span>&gt;<span data-count="0">=</span> fun (instr, env) -&gt; <span data-count="0">R</span>esult (instr @ [ Mv (A 0, reg) ], env)
-                 | <span data-count="0">S</span>ome _ -&gt; Result ([], env)
-                 | <span data-count="0">_</span> -&gt; Error "Error in if")
-                &gt;&gt;= fun (instr2, env) -&gt;
-                <span data-count="0">R</span>esult
-                  ( (cond :: instr1)
-                    @ instr2
-                    @ [ Jmp (get_true_tag_add<span data-count="0">r</span> id); Tag (get_ta<span data-count="0">g</span> id) ]
-                  , Some (A 0)
-                  , env ))
+                  <span data-count="0">R</span>esult ([], None, env)
+                  |&gt; build_aexp<span data-count="0">r</span> tag e2
+                  &gt;&gt;= fun (instr1, reg1, env) -&gt;
+                  <span data-count="0">(</span>match reg1 with
+                   | <span data-count="0">S</span>ome reg when reg &lt;&gt; A 0 -&gt;
+                     Result env
+                     |&gt; free_a<span data-count="0">0</span>
+                     <span data-count="0">&gt;</span>&gt;<span data-count="0">=</span> fun (instr, env) -&gt; <span data-count="0">R</span>esult (instr @ [ Mv (A 0, reg) ], env)
+                   | <span data-count="0">S</span>ome _ -&gt; Result ([], env)
+                   | <span data-count="0">_</span> -&gt; Error "Error in if")
+                  &gt;&gt;= fun (instr2, env) -&gt;
+                  <span data-count="0">R</span>esult
+                    ( (cond :: instr1)
+                      @ instr2
+                      @ [ Jmp (get_true_tag_add<span data-count="0">r</span> id); Tag (get_ta<span data-count="0">g</span> id) ]
+                    , Some (A 0)
+                    , env ))
             |&gt; <span data-count="0">b</span>uild_aexp<span data-count="0">r</span> tag e1
             &gt;&gt;= fun (instr1, reg2, env) -&gt;
             <span data-count="0">(</span>match reg2 with
