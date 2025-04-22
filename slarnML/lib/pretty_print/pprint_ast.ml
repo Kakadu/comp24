@@ -37,12 +37,12 @@ let rec pp_expr expr =
   | Div (e1, e2) -> concat "" [ "("; pp_expr e1; "/"; pp_expr e2; ")" ]
   | If (e1, e2, e3) ->
     concat "" [ "if ("; pp_expr e1; ") then ("; pp_expr e2; ") else ("; pp_expr e3; ")" ]
-  | Let (d, e2) -> concat "" [ "(let "; expr_of_decl d; "="; pp_expr e2; ")" ]
+  | Let (d, e2) -> concat "" [ "let "; expr_of_decl d; "=("; pp_expr e2; ")" ]
   | LetIn (d, e2, e3) ->
-    concat "" [ "(let "; expr_of_decl d; "="; pp_expr e2; " in "; pp_expr e3; ")" ]
+    concat "" [ "let "; expr_of_decl d; "=("; pp_expr e2; ") in ("; pp_expr e3; ")" ]
   | Fun (args, e) -> concat "" [ "(fun "; concat " " args; "->"; pp_expr e; ")" ]
   | App (e, args) ->
-    concat "" [ "("; pp_expr e; "->"; concat "->" (List.map pp_expr args); ")" ]
+    concat "" [ "("; pp_expr e; " "; concat " " (List.map pp_expr args); ")" ]
 ;;
 
 let pp_exprs exprs = concat "\t\n" @@ List.map pp_expr exprs

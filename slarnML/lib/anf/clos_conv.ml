@@ -18,7 +18,7 @@ let rec closure_conversion ?(env = []) ?(prt_args = []) = function
   | Ast.Id id ->
     (match List.find_opt (fun (name, _, _, _) -> name = id) env with
      | None ->
-       print_string ("Id " ^ id ^ " not found in env\n");
+       (* print_string ("Id " ^ id ^ " not found in env\n"); *)
        CId id
      | Some (_, new_name, _, args) ->
        if List.length args > 0

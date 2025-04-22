@@ -96,12 +96,10 @@
   (fun g(a c d)->(let h = ((a*(c+(d*e))) in {{{{h c} d} a} 4})))
   (fun f(a)->(let g = (let h = ((a*(c+(d*e))) in {{{{h c} d} a} 4}) in {{{g a} 2} 3})))
   $ dune exec lambda_lifting_test < manytests/do_not_type/001.ml
-  Id fac not found in env
   (fun recfac(n)->(if ((n<=1)) then (1) else ((n*{fac (n-1)}))))
   $ dune exec lambda_lifting_test < manytests/do_not_type/002if.ml
   (fun main()->(if (true) then (1) else (false)))
   $ dune exec lambda_lifting_test < manytests/do_not_type/003occurs.ml
-  Id f not found in env
   (fun anon_2(x f)->({{x x} f}))
   (fun anon_1(f x)->({f {{anon_2 x} f}}))
   (fun fix(f)->({anon_1 f}))

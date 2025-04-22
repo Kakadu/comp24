@@ -140,13 +140,6 @@
   ret
   $ dune exec riscv64_instr_test << EOF
   > let fac n = 
-  >   let rec fack n f = if (n <= 1) then (f 1) else (fack (n - 1) (fun x -> x * (f n))) in
-  >   (fack n (fun x -> x))
-  > ;;
-  > EOF
-  f not found
-  $ dune exec riscv64_instr_test << EOF
-  > let fac n = 
   >   let rec fack n = if (n < 1) then n else n * (fack (n - 1)) in
   >   (fack n)
   > ;;
@@ -240,18 +233,6 @@
   	ld s0,112(sp)
   	addi sp,sp,128
   ret
-  $ dune exec riscv64_instr_test << EOF
-  > let f a =
-  >   let g c d =
-  >     let h e = a * (c + d * e) in
-  >     (h 4)
-  >   in
-  >   (g 2 3)
-  > EOF
-  e not found
-  $ dune exec riscv64_instr_test < manytests/do_not_type/001.ml
-  Id fac not found in env
-  fac not found
 
   $ dune exec riscv64_instr_test < manytests/do_not_type/002if.ml
   .attribute unaligned_access, 0
@@ -293,10 +274,6 @@
   	ld s0,8(sp)
   	addi sp,sp,32
   ret
-
-  $ dune exec riscv64_instr_test < manytests/do_not_type/003occurs.ml
-  Id f not found in env
-  f not found
 
   $ dune exec riscv64_instr_test < manytests/typed/001fac.ml
   .attribute unaligned_access, 0

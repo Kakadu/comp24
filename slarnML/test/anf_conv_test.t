@@ -515,7 +515,6 @@
   	in
   	anf_app_20
   $ dune exec anf_conv_test < manytests/do_not_type/001.ml
-  Id fac not found in env
   let recfac n=
   	let anf_op_1=(n<=1)
   	in
@@ -542,7 +541,6 @@
   	in
   	anf_if_1
   $ dune exec anf_conv_test < manytests/do_not_type/003occurs.ml
-  Id f not found in env
   let anon_2 x f=
   	let anf_app_1=(x x)
   	in
