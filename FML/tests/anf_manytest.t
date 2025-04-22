@@ -60,31 +60,28 @@
   > | a::[] -> 1
   > | [] -> 0
   > EOF
-  let length xs = let anf1 = is_cons xs in
-  let anf0 = if anf1
-  then let anf3 = tl_list_get xs in
-  let anf2 = is_cons anf3 in
-  if anf2
-  then let anf5 = tl_list_get xs in
-  let anf4 = tl_list_get anf5 in
-  is_empty anf4
-  else false
-  else false in
+  let length xs = let anf2 = tl_list_get xs in
+  let anf1 = is_cons anf2 in
+  let anf6 = tl_list_get xs in
+  let anf5 = tl_list_get anf6 in
+  let anf4 = is_empty anf5 in
+  let anf7 = is_cons xs in
+  let anf3 = ( && ) anf7 anf4 in
+  let anf0 = ( && ) anf3 anf1 in
   if anf0
   then let a = hd_list_get xs in
-  let anf6 = tl_list_get xs in
-  let b = hd_list_get anf6 in
+  let anf8 = tl_list_get xs in
+  let b = hd_list_get anf8 in
   2
-  else let anf8 = is_cons xs in
-  let anf7 = if anf8
-  then let anf9 = tl_list_get xs in
-  is_empty anf9
-  else false in
-  if anf7
+  else let anf11 = tl_list_get xs in
+  let anf10 = is_empty anf11 in
+  let anf12 = is_cons xs in
+  let anf9 = ( && ) anf12 anf10 in
+  if anf9
   then let a = hd_list_get xs in
   1
-  else let anf10 = is_empty xs in
-  if anf10
+  else let anf13 = is_empty xs in
+  if anf13
   then 0
   else fail
   ;;
@@ -97,6 +94,7 @@
 
   $ ./anf_runner.exe << EOF
   > let is_empty x = x+1
+  > 
   > let rec length xs = match xs with
   > | [] -> 0
   > | _::tl -> 1 + length xs
@@ -185,10 +183,10 @@
   > | 12 -> 12
   > | _ -> 325
   > EOF
-  let lam_ll0 (=) x = let anf0 = (=) x 1 in
+  let f x = let anf0 = ( = ) x 1 in
   if anf0
   then 12
-  else let anf1 = (=) x 12 in
+  else let anf1 = ( = ) x 12 in
   if anf1
   then 12
   else if true
@@ -196,14 +194,10 @@
   else fail
   ;;
   
-  let f = lam_ll0 (=)
-  ;;
-  
   Типы до приведения в ANF:
   val f : int -> int
   
   Типы после приведения в ANF:
-  val lam_ll0 : ('a -> int -> bool) -> 'a -> int
   val f : int -> int
 
   $ ./anf_runner.exe < manytests/typed/001fac.ml
@@ -788,137 +782,128 @@
   let rec map f xs = let anf6 = is_empty xs in
   if anf6
   then []
-  else let anf8 = is_cons xs in
-  let anf7 = if anf8
-  then let anf9 = tl_list_get xs in
-  is_empty anf9
-  else false in
+  else let anf9 = tl_list_get xs in
+  let anf8 = is_empty anf9 in
+  let anf10 = is_cons xs in
+  let anf7 = ( && ) anf10 anf8 in
   if anf7
   then let a = hd_list_get xs in
-  let anf10 = f a in
-  (anf10::[])
-  else let anf12 = is_cons xs in
-  let anf11 = if anf12
-  then let anf14 = tl_list_get xs in
+  let anf11 = f a in
+  (anf11::[])
+  else let anf14 = tl_list_get xs in
   let anf13 = is_cons anf14 in
-  if anf13
-  then let anf16 = tl_list_get xs in
-  let anf15 = tl_list_get anf16 in
-  is_empty anf15
-  else false
-  else false in
-  if anf11
+  let anf18 = tl_list_get xs in
+  let anf17 = tl_list_get anf18 in
+  let anf16 = is_empty anf17 in
+  let anf19 = is_cons xs in
+  let anf15 = ( && ) anf19 anf16 in
+  let anf12 = ( && ) anf15 anf13 in
+  if anf12
   then let a = hd_list_get xs in
-  let anf17 = tl_list_get xs in
-  let b = hd_list_get anf17 in
-  let anf18 = f a in
-  let anf20 = f b in
-  let anf19 = (anf20::[]) in
-  (anf18::anf19)
-  else let anf22 = is_cons xs in
-  let anf21 = if anf22
-  then let anf24 = tl_list_get xs in
-  let anf23 = is_cons anf24 in
-  if anf23
-  then let anf27 = tl_list_get xs in
-  let anf26 = tl_list_get anf27 in
+  let anf20 = tl_list_get xs in
+  let b = hd_list_get anf20 in
+  let anf21 = f a in
+  let anf23 = f b in
+  let anf22 = (anf23::[]) in
+  (anf21::anf22)
+  else let anf26 = tl_list_get xs in
   let anf25 = is_cons anf26 in
-  if anf25
-  then let anf30 = tl_list_get xs in
+  let anf30 = tl_list_get xs in
   let anf29 = tl_list_get anf30 in
-  let anf28 = tl_list_get anf29 in
-  is_empty anf28
-  else false
-  else false
-  else false in
-  if anf21
+  let anf28 = is_cons anf29 in
+  let anf35 = tl_list_get xs in
+  let anf34 = tl_list_get anf35 in
+  let anf33 = tl_list_get anf34 in
+  let anf32 = is_empty anf33 in
+  let anf36 = is_cons xs in
+  let anf31 = ( && ) anf36 anf32 in
+  let anf27 = ( && ) anf31 anf28 in
+  let anf24 = ( && ) anf27 anf25 in
+  if anf24
   then let a = hd_list_get xs in
-  let anf31 = tl_list_get xs in
-  let b = hd_list_get anf31 in
-  let anf33 = tl_list_get xs in
-  let anf32 = tl_list_get anf33 in
-  let c = hd_list_get anf32 in
-  let anf34 = f a in
-  let anf36 = f b in
-  let anf38 = f c in
-  let anf37 = (anf38::[]) in
-  let anf35 = (anf36::anf37) in
-  (anf34::anf35)
-  else let anf40 = is_cons xs in
-  let anf39 = if anf40
-  then let anf42 = tl_list_get xs in
-  let anf41 = is_cons anf42 in
-  if anf41
-  then let anf45 = tl_list_get xs in
-  let anf44 = tl_list_get anf45 in
-  let anf43 = is_cons anf44 in
-  if anf43
-  then let anf48 = tl_list_get xs in
-  let anf47 = tl_list_get anf48 in
-  let anf46 = tl_list_get anf47 in
-  is_cons anf46
-  else false
-  else false
-  else false in
-  if anf39
-  then let a = hd_list_get xs in
-  let anf49 = tl_list_get xs in
-  let b = hd_list_get anf49 in
+  let anf37 = tl_list_get xs in
+  let b = hd_list_get anf37 in
+  let anf39 = tl_list_get xs in
+  let anf38 = tl_list_get anf39 in
+  let c = hd_list_get anf38 in
+  let anf40 = f a in
+  let anf42 = f b in
+  let anf44 = f c in
+  let anf43 = (anf44::[]) in
+  let anf41 = (anf42::anf43) in
+  (anf40::anf41)
+  else let anf47 = tl_list_get xs in
+  let anf46 = is_cons anf47 in
   let anf51 = tl_list_get xs in
   let anf50 = tl_list_get anf51 in
-  let c = hd_list_get anf50 in
-  let anf54 = tl_list_get xs in
-  let anf53 = tl_list_get anf54 in
-  let anf52 = tl_list_get anf53 in
-  let d = hd_list_get anf52 in
-  let anf57 = tl_list_get xs in
-  let anf56 = tl_list_get anf57 in
+  let anf49 = is_cons anf50 in
+  let anf56 = tl_list_get xs in
   let anf55 = tl_list_get anf56 in
-  let tl = tl_list_get anf55 in
-  let anf58 = f a in
-  let anf60 = f b in
-  let anf62 = f c in
-  let anf64 = f d in
-  let anf65 = map f tl in
-  let anf63 = (anf64::anf65) in
-  let anf61 = (anf62::anf63) in
-  let anf59 = (anf60::anf61) in
-  (anf58::anf59)
+  let anf54 = tl_list_get anf55 in
+  let anf53 = is_cons anf54 in
+  let anf57 = is_cons xs in
+  let anf52 = ( && ) anf57 anf53 in
+  let anf48 = ( && ) anf52 anf49 in
+  let anf45 = ( && ) anf48 anf46 in
+  if anf45
+  then let a = hd_list_get xs in
+  let anf58 = tl_list_get xs in
+  let b = hd_list_get anf58 in
+  let anf60 = tl_list_get xs in
+  let anf59 = tl_list_get anf60 in
+  let c = hd_list_get anf59 in
+  let anf63 = tl_list_get xs in
+  let anf62 = tl_list_get anf63 in
+  let anf61 = tl_list_get anf62 in
+  let d = hd_list_get anf61 in
+  let anf66 = tl_list_get xs in
+  let anf65 = tl_list_get anf66 in
+  let anf64 = tl_list_get anf65 in
+  let tl = tl_list_get anf64 in
+  let anf67 = f a in
+  let anf69 = f b in
+  let anf71 = f c in
+  let anf73 = f d in
+  let anf74 = map f tl in
+  let anf72 = (anf73::anf74) in
+  let anf70 = (anf71::anf72) in
+  let anf68 = (anf69::anf70) in
+  (anf67::anf68)
   else fail
   ;;
   
-  let rec append xs ys = let anf66 = is_empty xs in
-  if anf66
+  let rec append xs ys = let anf75 = is_empty xs in
+  if anf75
   then ys
-  else let anf67 = is_cons xs in
-  if anf67
+  else let anf76 = is_cons xs in
+  if anf76
   then let x = hd_list_get xs in
   let xs_ac0 = tl_list_get xs in
-  let anf68 = append xs_ac0 ys in
-  (x::anf68)
+  let anf77 = append xs_ac0 ys in
+  (x::anf77)
   else fail
   ;;
   
-  let rec helper_ll1 append xs = let anf69 = is_empty xs in
-  if anf69
+  let rec helper_ll1 append xs = let anf78 = is_empty xs in
+  if anf78
   then []
-  else let anf70 = is_cons xs in
-  if anf70
+  else let anf79 = is_cons xs in
+  if anf79
   then let h = hd_list_get xs in
   let tl = tl_list_get xs in
-  let anf71 = helper_ll1 append tl in
-  append h anf71
+  let anf80 = helper_ll1 append tl in
+  append h anf80
   else fail
   ;;
   
   let concat = helper_ll1 append
   ;;
   
-  let rec iter f xs = let anf72 = is_empty xs in
-  if anf72
+  let rec iter f xs = let anf81 = is_empty xs in
+  if anf81
   then ()
-  else let anf73 = is_cons xs in
-  if anf73
+  else let anf82 = is_cons xs in
+  if anf82
   then let h = hd_list_get xs in
   let tl = tl_list_get xs in
   let () = f h in
@@ -929,33 +914,33 @@
   let lam_ll2 h a = (h, a)
   ;;
   
-  let rec cartesian xs ys = let anf74 = is_empty xs in
-  if anf74
+  let rec cartesian xs ys = let anf83 = is_empty xs in
+  if anf83
   then []
-  else let anf75 = is_cons xs in
-  if anf75
+  else let anf84 = is_cons xs in
+  if anf84
   then let h = hd_list_get xs in
   let tl = tl_list_get xs in
-  let anf76 = cartesian tl ys in
-  let anf78 = lam_ll2 h in
-  let anf77 = map anf78 ys in
-  append anf77 anf76
+  let anf85 = cartesian tl ys in
+  let anf87 = lam_ll2 h in
+  let anf86 = map anf87 ys in
+  append anf86 anf85
   else fail
   ;;
   
-  let main = let anf81 = (3::[]) in
-  let anf80 = (2::anf81) in
-  let anf79 = (1::anf80) in
-  let () = iter print_int anf79 in
-  let anf87 = (4::[]) in
-  let anf86 = (3::anf87) in
-  let anf85 = (2::anf86) in
-  let anf84 = (1::anf85) in
-  let anf89 = (2::[]) in
+  let main = let anf90 = (3::[]) in
+  let anf89 = (2::anf90) in
   let anf88 = (1::anf89) in
-  let anf83 = cartesian anf88 anf84 in
-  let anf82 = length anf83 in
-  let () = print_int anf82 in
+  let () = iter print_int anf88 in
+  let anf96 = (4::[]) in
+  let anf95 = (3::anf96) in
+  let anf94 = (2::anf95) in
+  let anf93 = (1::anf94) in
+  let anf98 = (2::[]) in
+  let anf97 = (1::anf98) in
+  let anf92 = cartesian anf97 anf93 in
+  let anf91 = length anf92 in
+  let () = print_int anf91 in
   0
   ;;
   

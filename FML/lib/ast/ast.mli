@@ -18,6 +18,7 @@ type type_annotation =
   | AUnit (** : unit *)
   | AInt (** : int *)
   | ABool (** : bool *)
+  | AVar of int (** 'a *)
   | AList of type_annotation (** : 'a list *)
   | ATuple of type_annotation list (** : 'a * 'b *)
   | AFunction of type_annotation * type_annotation (** : 'a -> 'b *)

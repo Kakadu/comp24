@@ -18,6 +18,7 @@ type type_annotation =
   | AUnit
   | AInt
   | ABool
+  | AVar of int
   | AList of type_annotation
   | ATuple of type_annotation list
   | AFunction of type_annotation * type_annotation

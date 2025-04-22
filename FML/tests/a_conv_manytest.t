@@ -18,7 +18,7 @@
            (EFun ((PIdentifier "xs"),
               (EMatch ((EIdentifier "xs"),
                  [(PNill, (EConst (CInt 0)));
-                   ((PCons ((PIdentifier "_"), (PIdentifier "tl"))),
+                   ((PCons (PAny, (PIdentifier "tl"))),
                     (EApplication (
                        (EApplication ((EIdentifier "( + )"), (EConst (CInt 1))
                           )),

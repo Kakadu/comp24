@@ -297,6 +297,7 @@ let annotation_to_type =
     | AInt -> tint
     | ABool -> tbool
     | AUnit -> tunit
+    | AVar n -> tvar n
     | AFunction (l, r) -> tfunction (helper l) (helper r)
     | AList a -> tlist (helper a)
     | ATuple a -> ttuple @@ List.map helper a

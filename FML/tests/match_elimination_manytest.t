@@ -1,12 +1,15 @@
   $ ./match_elimination_runner.exe << EOF
-  > let f (x,y) = x+y;;
-  > let main = let () = print_int ( f (1,2) ) in 0;;
+  > let f (x,y) [] h::[] = x+y + h;;
+  > let main = let () = print_int ( f (1,2) [] [1]) in 0;;
   > EOF
-  let f = (fun me_me0 -> let x = ((tuple_get me_me0) 0) in
-  let y = ((tuple_get me_me0) 1) in
-  ((( + ) x) y))
+  let f = (fun me_me2 me_me1 me_me0 -> if ((( && ) ((( && ) (is_empty me_me1)) (is_cons me_me0))) (is_empty (tl_list_get me_me0)))
+  then let x = ((tuple_get me_me2) 0) in
+  let y = ((tuple_get me_me2) 1) in
+  let h = (hd_list_get me_me0) in
+  ((( + ) ((( + ) x) y)) h)
+  else fail)
   
-  let main = let () = (print_int (f (1, 2))) in
+  let main = let () = (print_int (((f (1, 2)) []) (1::[]))) in
   0
 
   $ ./match_elimination_runner.exe << EOF
@@ -21,17 +24,11 @@
   > | a::[] -> 1
   > | [] -> 0
   > EOF
-  let length = (fun xs -> if if (is_cons xs)
-  then if (is_cons (tl_list_get xs))
-  then (is_empty (tl_list_get (tl_list_get xs)))
-  else false
-  else false
+  let length = (fun xs -> if ((( && ) ((( && ) (is_cons xs)) (is_empty (tl_list_get (tl_list_get xs))))) (is_cons (tl_list_get xs)))
   then let a = (hd_list_get xs) in
   let b = (hd_list_get (tl_list_get xs)) in
   2
-  else if if (is_cons xs)
-  then (is_empty (tl_list_get xs))
-  else false
+  else if ((( && ) (is_cons xs)) (is_empty (tl_list_get xs)))
   then let a = (hd_list_get xs) in
   1
   else if (is_empty xs)
@@ -79,9 +76,9 @@
   > | 12 -> 12
   > | _ -> 325
   > EOF
-  let f = (fun x -> if (((=) x) 1)
+  let f = (fun x -> if ((( = ) x) 1)
   then 12
-  else if (((=) x) 12)
+  else if ((( = ) x) 12)
   then 12
   else if true
   then 325
@@ -289,37 +286,19 @@
   
   let rec map = (fun f xs -> if (is_empty xs)
   then []
-  else if if (is_cons xs)
-  then (is_empty (tl_list_get xs))
-  else false
+  else if ((( && ) (is_cons xs)) (is_empty (tl_list_get xs)))
   then let a = (hd_list_get xs) in
   ((f a)::[])
-  else if if (is_cons xs)
-  then if (is_cons (tl_list_get xs))
-  then (is_empty (tl_list_get (tl_list_get xs)))
-  else false
-  else false
+  else if ((( && ) ((( && ) (is_cons xs)) (is_empty (tl_list_get (tl_list_get xs))))) (is_cons (tl_list_get xs)))
   then let a = (hd_list_get xs) in
   let b = (hd_list_get (tl_list_get xs)) in
   ((f a)::((f b)::[]))
-  else if if (is_cons xs)
-  then if (is_cons (tl_list_get xs))
-  then if (is_cons (tl_list_get (tl_list_get xs)))
-  then (is_empty (tl_list_get (tl_list_get (tl_list_get xs))))
-  else false
-  else false
-  else false
+  else if ((( && ) ((( && ) ((( && ) (is_cons xs)) (is_empty (tl_list_get (tl_list_get (tl_list_get xs)))))) (is_cons (tl_list_get (tl_list_get xs))))) (is_cons (tl_list_get xs)))
   then let a = (hd_list_get xs) in
   let b = (hd_list_get (tl_list_get xs)) in
   let c = (hd_list_get (tl_list_get (tl_list_get xs))) in
   ((f a)::((f b)::((f c)::[])))
-  else if if (is_cons xs)
-  then if (is_cons (tl_list_get xs))
-  then if (is_cons (tl_list_get (tl_list_get xs)))
-  then (is_cons (tl_list_get (tl_list_get (tl_list_get xs))))
-  else false
-  else false
-  else false
+  else if ((( && ) ((( && ) ((( && ) (is_cons xs)) (is_cons (tl_list_get (tl_list_get (tl_list_get xs)))))) (is_cons (tl_list_get (tl_list_get xs))))) (is_cons (tl_list_get xs)))
   then let a = (hd_list_get xs) in
   let b = (hd_list_get (tl_list_get xs)) in
   let c = (hd_list_get (tl_list_get (tl_list_get xs))) in
