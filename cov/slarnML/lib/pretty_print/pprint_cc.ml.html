@@ -169,15 +169,15 @@ let rec pp_cc_expr expr =
       ""
       [ "if ("; pp_cc_exp<span data-count="0">r</span> e1; ") then ("; pp_cc_exp<span data-count="0">r</span> e2; ") else ("; pp_cc_exp<span data-count="0">r</span> e3; ")" ]
   | <span data-count="0">C</span>Let (d, e2) -&gt;
-    concat "" [ "(let "; Pprint_ast.expr_of_dec<span data-count="0">l</span> d; "="; pp_cc_exp<span data-count="0">r</span> e2; ")" ]
+    concat "" [ "let "; Pprint_ast.expr_of_dec<span data-count="0">l</span> d; "=("; pp_cc_exp<span data-count="0">r</span> e2; ")" ]
   | <span data-count="0">C</span>LetIn (d, e2, e3) -&gt;
     concat
       ""
-      [ "(let "
+      [ "let "
       ; Pprint_ast.expr_of_dec<span data-count="0">l</span> d
-      ; "="
+      ; "=("
       ; pp_cc_exp<span data-count="0">r</span> e2
-      ; " in "
+      ; ") in ("
       ; pp_cc_exp<span data-count="0">r</span> e3
       ; ")"
       ]

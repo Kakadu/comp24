@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8"/>
     <title>riscv64_instr_test.ml &mdash; Coverage report</title>
-    <meta name="description" content="100.00% coverage in test/riscv64_instr_test.ml">
+    <meta name="description" content="84.21% coverage in test/riscv64_instr_test.ml">
     <link rel="stylesheet" href="../coverage.css"/>
     <script src="../highlight.pack.js"></script>
     <script>hljs.initHighlightingOnLoad();</script>
@@ -15,9 +15,11 @@
           <span class="dirname">test/</span>riscv64_instr_test.ml
         </a>
       </h1>
-      <h2>100.00%</h2>
+      <h2>84.21%</h2>
     </div>
     <div id="navbar">
+      <span class="unvisited" style="bottom:22.73%"></span>
+      <span class="unvisited" style="bottom:4.55%"></span>
     </div>
     <div id="report">
       <div id="lines-layer">
@@ -38,11 +40,11 @@
 <a id="L14"></a><span class="visited"> </span>
 <a id="L15"></a><span class="visited"> </span>
 <a id="L16"></a><span > </span>
-<a id="L17"></a><span class="visited"> </span>
+<a id="L17"></a><span class="unvisited"> </span>
 <a id="L18"></a><span > </span>
 <a id="L19"></a><span > </span>
 <a id="L20"></a><span class="visited"> </span>
-<a id="L21"></a><span class="visited"> </span>
+<a id="L21"></a><span class="unvisited"> </span>
 <a id="L22"></a><span > </span>
 </pre>
       </div>
@@ -75,23 +77,23 @@
 
 let () =
   let s = Stdio.In_channel.input_all Stdlib.stdin in
-  <span data-count="15">l</span>et result =
+  <span data-count="13">l</span>et result =
     match SlarnML_lib.Parser.parser s with
-    | <span data-count="11">O</span>k ast -&gt;
-      SlarnML_lib.Clos_conv.clos_con<span data-count="11">v</span> ast
-      &gt;&gt;<span data-count="11">=</span> (fun ast -&gt; <span data-count="11">S</span>larnML_lib.Lambda_lifting.lambda_lifting ast)
-      &gt;&gt;<span data-count="11">=</span> fun ast -&gt;
-      <span data-count="11">R</span>esult (SlarnML_lib.Anf_conv.an<span data-count="11">f</span> ast)
-      &gt;&gt;<span data-count="11">=</span> (fun anf -&gt; <span data-count="11">S</span>larnML_lib.Riscv.asm anf)
+    | <span data-count="13">O</span>k ast -&gt;
+      SlarnML_lib.Clos_conv.clos_con<span data-count="13">v</span> ast
+      &gt;&gt;<span data-count="13">=</span> (fun ast -&gt; <span data-count="13">S</span>larnML_lib.Lambda_lifting.lambda_lifting ast)
+      &gt;&gt;<span data-count="13">=</span> fun ast -&gt;
+      <span data-count="13">R</span>esult (SlarnML_lib.Anf_conv.an<span data-count="13">f</span> ast)
+      &gt;&gt;<span data-count="13">=</span> (fun anf -&gt; <span data-count="13">S</span>larnML_lib.Riscv.asm anf)
       &gt;&gt;= fun prog -&gt;
-      <span data-count="11">R</span>esult
-        (String.conca<span data-count="11">t</span> "\n" (List.ma<span data-count="11">p</span> (SlarnML_lib.Pprint_riscv.pp_instructio<span data-count="11">n</span> "\t") prog)
+      <span data-count="13">R</span>esult
+        (String.conca<span data-count="13">t</span> "\n" (List.ma<span data-count="13">p</span> (SlarnML_lib.Pprint_riscv.pp_instructio<span data-count="13">n</span> "\t") prog)
          ^ "\n")
-    | <span data-count="4">E</span>rror message -&gt; SlarnML_lib.Res.Error message
+    | <span data-count="0">E</span>rror message -&gt; SlarnML_lib.Res.Error message
   in
   match result with
-  | <span data-count="11">S</span>larnML_lib.Res.Result r -&gt; print_strin<span data-count="11">g</span> @@ r
-  | <span data-count="4">E</span>rror e -&gt; Printf.eprint<span data-count="4">f</span> "%s" e
+  | <span data-count="13">S</span>larnML_lib.Res.Result r -&gt; print_strin<span data-count="13">g</span> @@ r
+  | <span data-count="0">E</span>rror e -&gt; Printf.eprint<span data-count="0">f</span> "%s" e
 ;;
 </code></pre>
       </div>
