@@ -41,9 +41,9 @@
 </pre>
 <pre><code class="ocaml">let () =
   let s = Stdio.In_channel.input_all Stdlib.stdin in
-  <span data-count="34">m</span>atch SlarnML_lib.Parser.parser s with
+  <span data-count="30">m</span>atch SlarnML_lib.Parser.parser s with
   | <span data-count="29">O</span>k ast -&gt; print_strin<span data-count="29">g</span> @@ SlarnML_lib.Pprint_ast.pp_expr<span data-count="29">s</span> ast
-  | <span data-count="5">E</span>rror message -&gt; Format.print<span data-count="5">f</span> "Error: %s\n" message
+  | <span data-count="1">E</span>rror message -&gt; Format.print<span data-count="1">f</span> "Error: %s\n" message
 ;;
 </code></pre>
       </div>

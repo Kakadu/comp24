@@ -75,14 +75,14 @@
 
 let () =
   let s = Stdio.In_channel.input_all Stdlib.stdin in
-  <span data-count="19">l</span>et result =
+  <span data-count="15">l</span>et result =
     match SlarnML_lib.Parser.parser s with
-    | <span data-count="15">O</span>k ast -&gt;
-      SlarnML_lib.Clos_conv.clos_con<span data-count="15">v</span> ast
-      &gt;&gt;<span data-count="15">=</span> (fun ast -&gt; <span data-count="15">S</span>larnML_lib.Lambda_lifting.lambda_lifting ast)
-      &gt;&gt;<span data-count="15">=</span> fun ast -&gt;
-      <span data-count="15">R</span>esult (SlarnML_lib.Anf_conv.an<span data-count="15">f</span> ast)
-      &gt;&gt;<span data-count="15">=</span> (fun anf -&gt; <span data-count="15">S</span>larnML_lib.Riscv.asm anf)
+    | <span data-count="11">O</span>k ast -&gt;
+      SlarnML_lib.Clos_conv.clos_con<span data-count="11">v</span> ast
+      &gt;&gt;<span data-count="11">=</span> (fun ast -&gt; <span data-count="11">S</span>larnML_lib.Lambda_lifting.lambda_lifting ast)
+      &gt;&gt;<span data-count="11">=</span> fun ast -&gt;
+      <span data-count="11">R</span>esult (SlarnML_lib.Anf_conv.an<span data-count="11">f</span> ast)
+      &gt;&gt;<span data-count="11">=</span> (fun anf -&gt; <span data-count="11">S</span>larnML_lib.Riscv.asm anf)
       &gt;&gt;= fun prog -&gt;
       <span data-count="11">R</span>esult
         (String.conca<span data-count="11">t</span> "\n" (List.ma<span data-count="11">p</span> (SlarnML_lib.Pprint_riscv.pp_instructio<span data-count="11">n</span> "\t") prog)
@@ -91,7 +91,7 @@ let () =
   in
   match result with
   | <span data-count="11">S</span>larnML_lib.Res.Result r -&gt; print_strin<span data-count="11">g</span> @@ r
-  | <span data-count="8">E</span>rror e -&gt; Printf.eprint<span data-count="8">f</span> "%s" e
+  | <span data-count="4">E</span>rror e -&gt; Printf.eprint<span data-count="4">f</span> "%s" e
 ;;
 </code></pre>
       </div>

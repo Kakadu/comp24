@@ -287,12 +287,12 @@ let rec pp_expr expr =
   | <span data-count="0">D</span>iv (e1, e2) -&gt; concat "" [ "("; pp_exp<span data-count="0">r</span> e1; "/"; pp_exp<span data-count="0">r</span> e2; ")" ]
   | <span data-count="0">I</span>f (e1, e2, e3) -&gt;
     concat "" [ "if ("; pp_exp<span data-count="0">r</span> e1; ") then ("; pp_exp<span data-count="0">r</span> e2; ") else ("; pp_exp<span data-count="0">r</span> e3; ")" ]
-  | <span data-count="0">L</span>et (d, e2) -&gt; concat "" [ "(let "; expr_of_dec<span data-count="0">l</span> d; "="; pp_exp<span data-count="0">r</span> e2; ")" ]
+  | <span data-count="0">L</span>et (d, e2) -&gt; concat "" [ "let "; expr_of_dec<span data-count="0">l</span> d; "=("; pp_exp<span data-count="0">r</span> e2; ")" ]
   | <span data-count="0">L</span>etIn (d, e2, e3) -&gt;
-    concat "" [ "(let "; expr_of_dec<span data-count="0">l</span> d; "="; pp_exp<span data-count="0">r</span> e2; " in "; pp_exp<span data-count="0">r</span> e3; ")" ]
+    concat "" [ "let "; expr_of_dec<span data-count="0">l</span> d; "=("; pp_exp<span data-count="0">r</span> e2; ") in ("; pp_exp<span data-count="0">r</span> e3; ")" ]
   | <span data-count="0">F</span>un (args, e) -&gt; concat "" [ "(fun "; conca<span data-count="0">t</span> " " args; "-&gt;"; pp_exp<span data-count="0">r</span> e; ")" ]
   | <span data-count="0">A</span>pp (e, args) -&gt;
-    concat "" [ "("; pp_exp<span data-count="0">r</span> e; "-&gt;"; conca<span data-count="0">t</span> "-&gt;" (List.ma<span data-count="0">p</span> pp_expr args); ")" ]
+    concat "" [ "("; pp_exp<span data-count="0">r</span> e; " "; conca<span data-count="0">t</span> " " (List.ma<span data-count="0">p</span> pp_expr args); ")" ]
 ;;
 
 let pp_exprs exprs = <span data-count="0">c</span>oncat "\t\n" @@ List.ma<span data-count="0">p</span> pp_expr exprs
