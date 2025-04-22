@@ -26,15 +26,15 @@ let rec pp_cc_expr expr =
       ""
       [ "if ("; pp_cc_expr e1; ") then ("; pp_cc_expr e2; ") else ("; pp_cc_expr e3; ")" ]
   | CLet (d, e2) ->
-    concat "" [ "(let "; Pprint_ast.expr_of_decl d; "="; pp_cc_expr e2; ")" ]
+    concat "" [ "let "; Pprint_ast.expr_of_decl d; "=("; pp_cc_expr e2; ")" ]
   | CLetIn (d, e2, e3) ->
     concat
       ""
-      [ "(let "
+      [ "let "
       ; Pprint_ast.expr_of_decl d
-      ; "="
+      ; "=("
       ; pp_cc_expr e2
-      ; " in "
+      ; ") in ("
       ; pp_cc_expr e3
       ; ")"
       ]

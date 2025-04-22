@@ -144,7 +144,8 @@ let rec lifting cc_ast fun_ids g_args stack lvl res =
      then r1
      else r1 |> insert_let (get_fun_let (get_decl d) a1))
     |> lifting e2 e2_funs g_args stack lvl
-    |> update_ast (fun a2 -> Result (LIn (id, a1, a2)))
+    |> update_ast (fun a2 ->
+      if List.length (get_args d) = 0 then Result (LIn (id, a1, a2)) else Result a2)
     |> filter lvl
   | CFun (args, e) ->
     res

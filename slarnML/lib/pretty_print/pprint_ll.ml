@@ -27,12 +27,12 @@ let rec pp_ll_expr expr =
       ""
       [ "if ("; pp_ll_expr e1; ") then ("; pp_ll_expr e2; ") else ("; pp_ll_expr e3; ")" ]
   | LApp (e, args) ->
-    concat "" [ "{"; pp_ll_expr e; " "; concat " " (List.map pp_ll_expr args); "}" ]
+    concat "" [ ""; pp_ll_expr e; " "; concat " " (List.map pp_ll_expr args); "" ]
   | LIn (id, e1, e2) ->
     concat "" [ "let "; id; " = ("; pp_ll_expr e1; " in "; pp_ll_expr e2; ")" ]
 ;;
 
 let pp_gl_expr = function
   | LFun (id, args, e) ->
-    concat "" [ "(fun "; id; "("; concat " " args; ")->("; pp_ll_expr e; "))" ]
+    concat "" [ "let "; id; " "; concat " " args; " =("; pp_ll_expr e; ")" ]
 ;;

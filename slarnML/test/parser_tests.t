@@ -127,3 +127,12 @@
   $ dune exec parser_test < manytests/typed/006partial3.ml
   let foo a=(let ()=((print_int a)) in ((fun b->let ()=((print_int b)) in ((fun c->(print_int c))))))	
   let main=(let ()=((foo 4 8 9)) in (0))
+  $ dune exec parser_test << EOF
+  > let f a =
+  >   let g c d =
+  >     let h e = a * (c + d * e) in
+  >     (h 4)
+  >   in
+  >   (g 2 3)
+  > EOF
+  let f a=(let g c d=(let h e=((a*(c+(d*e)))) in ((h 4))) in ((g 2 3)))

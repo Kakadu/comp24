@@ -1,5 +1,262 @@
   $ dune exec riscv64_instr_test << EOF
   > let f a =
+  >   let g c d =
+  >     let h e = a * (c + d * e) in
+  >     (h 4)
+  >   in
+  >   (g 2 3)
+  > EOF
+  .attribute unaligned_access, 0
+  .attribute stack_align, 16
+  .global main
+  main:
+  	addi sp,sp,-32
+  	sd ra,16(sp)
+  	sd s0,8(sp)
+  	sd s1,0(sp)
+  	addi s0,sp,32
+  call init_part_apps
+  call main2
+  	sd a0,24(sp)
+  call cleanup_part_apps
+  	ld a0,24(sp)
+  	ld ra,16(sp)
+  	ld s0,8(sp)
+  	ld s1,0(sp)
+  	addi sp,sp,32
+  	li a7,93
+  ecall
+  h:
+  	addi sp,sp,-80
+  	sd ra,64(sp)
+  	sd s0,56(sp)
+  	addi s0,sp,80
+  	sd a3,-80(s0)
+  	sd a2,-72(s0)
+  	sd a1,-64(s0)
+  	sd a0,-56(s0)
+  	mul t0,a1,a3
+  	add t1,a0,t0
+  	mul t2,a2,t1
+  	mv a0,t2
+  	ld ra,64(sp)
+  	ld s0,56(sp)
+  	addi sp,sp,80
+  ret
+  g:
+  	addi sp,sp,-176
+  	sd ra,160(sp)
+  	sd s0,152(sp)
+  	addi s0,sp,176
+  	sd a2,-176(s0)
+  	sd a1,-168(s0)
+  	sd a0,-160(s0)
+  	lui a0,%hi(h)
+  	addi a0,a0,%lo(h)
+  	ld a3,-168(s0)
+  	li a2,1
+  	li a1,4
+  call part_app
+  	sd a0,-32(s0)
+  	ld a0,-32(s0)
+  	ld a3,-176(s0)
+  	li a2,1
+  	li a1,0
+  call part_app
+  	sd a0,-40(s0)
+  	ld a0,-40(s0)
+  	ld a3,-160(s0)
+  	li a2,1
+  	li a1,0
+  call part_app
+  	sd a0,-48(s0)
+  	ld a0,-48(s0)
+  	li a3,4
+  	li a2,1
+  	li a1,0
+  call part_app
+  	mv a0,a0
+  	ld ra,160(sp)
+  	ld s0,152(sp)
+  	addi sp,sp,176
+  ret
+  f:
+  	addi sp,sp,-128
+  	sd ra,112(sp)
+  	sd s0,104(sp)
+  	addi s0,sp,128
+  	sd a0,-128(s0)
+  	lui a0,%hi(g)
+  	addi a0,a0,%lo(g)
+  	ld a3,-128(s0)
+  	li a2,1
+  	li a1,3
+  call part_app
+  	sd a0,-32(s0)
+  	ld a0,-32(s0)
+  	li a3,2
+  	li a2,1
+  	li a1,0
+  call part_app
+  	sd a0,-40(s0)
+  	ld a0,-40(s0)
+  	li a3,3
+  	li a2,1
+  	li a1,0
+  call part_app
+  	mv a0,a0
+  	ld ra,112(sp)
+  	ld s0,104(sp)
+  	addi sp,sp,128
+  ret
+  $ dune exec riscv64_instr_test << EOF
+  > let fac n =
+  >   let rec fack n f = if (n <= 1) then (f 1) else (fack (n - 1) (fun x -> x * (f n))) in
+  >   (fack n (fun x -> x))
+  > ;;
+  > EOF
+  .attribute unaligned_access, 0
+  .attribute stack_align, 16
+  .global main
+  main:
+  	addi sp,sp,-32
+  	sd ra,16(sp)
+  	sd s0,8(sp)
+  	sd s1,0(sp)
+  	addi s0,sp,32
+  call init_part_apps
+  call main2
+  	sd a0,24(sp)
+  call cleanup_part_apps
+  	ld a0,24(sp)
+  	ld ra,16(sp)
+  	ld s0,8(sp)
+  	ld s1,0(sp)
+  	addi sp,sp,32
+  	li a7,93
+  ecall
+  anon_1:
+  	addi sp,sp,-96
+  	sd ra,80(sp)
+  	sd s0,72(sp)
+  	addi s0,sp,96
+  	sd a3,-96(s0)
+  	sd a2,-88(s0)
+  	sd a1,-80(s0)
+  	ld a0,-80(s0)
+  	ld a3,-88(s0)
+  	li a2,1
+  	li a1,0
+  call part_app
+  	ld a1,-96(s0)
+  	mul a2,a1,a0
+  	mv a0,a2
+  	ld ra,80(sp)
+  	ld s0,72(sp)
+  	addi sp,sp,96
+  ret
+  fack:
+  	addi sp,sp,-256
+  	sd ra,240(sp)
+  	sd s0,232(sp)
+  	addi s0,sp,256
+  	sd a1,-256(s0)
+  	sd a0,-248(s0)
+  	li t0,1
+  ble a0,t0,.tag_anf_op_3
+  	li t1,1
+  	sub t2,a0,t1
+  	sd t2,-32(s0)
+  	lui a0,%hi(fack)
+  	addi a0,a0,%lo(fack)
+  	ld a3,-32(s0)
+  	li a2,1
+  	li a1,2
+  call part_app
+  	sd a0,-40(s0)
+  	lui a0,%hi(anon_1)
+  	addi a0,a0,%lo(anon_1)
+  	ld a3,-248(s0)
+  	li a2,1
+  	li a1,4
+  call part_app
+  	sd a0,-48(s0)
+  	ld a0,-48(s0)
+  	ld a3,-256(s0)
+  	li a2,1
+  	li a1,0
+  call part_app
+  	sd a0,-56(s0)
+  	ld a0,-56(s0)
+  	ld a3,-248(s0)
+  	li a2,1
+  	li a1,0
+  call part_app
+  	sd a0,-64(s0)
+  	ld a0,-40(s0)
+  	ld a3,-64(s0)
+  	li a2,1
+  	li a1,0
+  call part_app
+  	j .tag_anf_op_3_t
+  .tag_anf_op_3:
+  	sd a0,-72(s0)
+  	ld a0,-256(s0)
+  	li a3,1
+  	li a2,1
+  	li a1,0
+  call part_app
+  .tag_anf_op_3_t:
+  	sd a0,-80(s0)
+  	mv a0,a0
+  	ld ra,240(sp)
+  	ld s0,232(sp)
+  	addi sp,sp,256
+  ret
+  anon_2:
+  	addi sp,sp,-32
+  	sd ra,24(sp)
+  	sd s0,16(sp)
+  	addi s0,sp,32
+  	sd a1,-32(s0)
+  	sd a0,-24(s0)
+  	mv a0,a1
+  	ld ra,24(sp)
+  	ld s0,16(sp)
+  	addi sp,sp,32
+  ret
+  fac:
+  	addi sp,sp,-128
+  	sd ra,112(sp)
+  	sd s0,104(sp)
+  	addi s0,sp,128
+  	sd a0,-128(s0)
+  	lui a0,%hi(fack)
+  	addi a0,a0,%lo(fack)
+  	ld a3,-128(s0)
+  	li a2,1
+  	li a1,2
+  call part_app
+  	sd a0,-32(s0)
+  	lui a0,%hi(anon_2)
+  	addi a0,a0,%lo(anon_2)
+  	ld a3,-128(s0)
+  	li a2,1
+  	li a1,2
+  call part_app
+  	sd a0,-40(s0)
+  	ld a0,-32(s0)
+  	ld a3,-40(s0)
+  	li a2,1
+  	li a1,0
+  call part_app
+  	mv a0,a0
+  	ld ra,112(sp)
+  	ld s0,104(sp)
+  	addi sp,sp,128
+  ret
+  $ dune exec riscv64_instr_test << EOF
+  > let f a =
   >   let g = (fun x -> x) in 
   >   let h = (fun x -> a * x) in 
   >   ((g a) + (h a))
@@ -85,58 +342,42 @@
   	addi sp,sp,64
   ret
   f:
-  	addi sp,sp,-240
-  	sd ra,232(sp)
-  	sd s0,224(sp)
-  	addi s0,sp,240
-  	sd a0,-240(s0)
-  	lui a0,%hi(anon_1)
-  	addi a0,a0,%lo(anon_1)
-  	ld a3,-240(s0)
-  	li a2,1
-  	li a1,2
-  call part_app
-  	sd a0,-32(s0)
-  	sd a0,-40(s0)
-  	lui a0,%hi(anon_2)
-  	addi a0,a0,%lo(anon_2)
-  	ld a3,-240(s0)
-  	li a2,1
-  	li a1,2
-  call part_app
-  	sd a0,-48(s0)
-  	sd a0,-56(s0)
+  	addi sp,sp,-160
+  	sd ra,152(sp)
+  	sd s0,144(sp)
+  	addi s0,sp,160
+  	sd a0,-160(s0)
   	lui a0,%hi(g)
   	addi a0,a0,%lo(g)
-  	ld a3,-240(s0)
+  	ld a3,-160(s0)
   	li a2,1
   	li a1,1
   call part_app
-  	sd a0,-64(s0)
-  	ld a0,-64(s0)
-  	ld a3,-240(s0)
+  	sd a0,-32(s0)
+  	ld a0,-32(s0)
+  	ld a3,-160(s0)
   	li a2,1
   	li a1,0
   call part_app
-  	sd a0,-72(s0)
+  	sd a0,-40(s0)
   	lui a0,%hi(h)
   	addi a0,a0,%lo(h)
-  	ld a3,-240(s0)
+  	ld a3,-160(s0)
   	li a2,1
   	li a1,1
   call part_app
-  	sd a0,-80(s0)
-  	ld a0,-80(s0)
-  	ld a3,-240(s0)
+  	sd a0,-48(s0)
+  	ld a0,-48(s0)
+  	ld a3,-160(s0)
   	li a2,1
   	li a1,0
   call part_app
-  	ld t0,-72(s0)
+  	ld t0,-40(s0)
   	add t1,t0,a0
   	mv a0,t1
-  	ld ra,232(sp)
-  	ld s0,224(sp)
-  	addi sp,sp,240
+  	ld ra,152(sp)
+  	ld s0,144(sp)
+  	addi sp,sp,160
   ret
   $ dune exec riscv64_instr_test << EOF
   > let fac n = 
@@ -195,43 +436,21 @@
   	addi sp,sp,96
   ret
   fac:
-  	addi sp,sp,-128
-  	sd ra,120(sp)
-  	sd s0,112(sp)
-  	addi s0,sp,128
-  	sd a0,-128(s0)
-  	li t0,1
-  blt a0,t0,.tag_anf_op_6
-  	li t1,1
-  	sub t2,a0,t1
-  	sd t2,-32(s0)
-  	lui a0,%hi(fack)
-  	addi a0,a0,%lo(fack)
-  	ld a3,-32(s0)
-  	li a2,1
-  	li a1,1
-  call part_app
-  	ld t2,-128(s0)
-  	mul t1,t2,a0
-  	sd a0,-40(s0)
-  	mv a0,t1
-  	j .tag_anf_op_6_t
-  .tag_anf_op_6:
-  	mv a0,t2
-  .tag_anf_op_6_t:
-  	sd a0,-48(s0)
-  	sd t1,-56(s0)
+  	addi sp,sp,-64
+  	sd ra,48(sp)
+  	sd s0,40(sp)
+  	addi s0,sp,64
   	sd a0,-64(s0)
   	lui a0,%hi(fack)
   	addi a0,a0,%lo(fack)
-  	ld a3,-128(s0)
+  	ld a3,-64(s0)
   	li a2,1
   	li a1,1
   call part_app
   	mv a0,a0
-  	ld ra,120(sp)
-  	ld s0,112(sp)
-  	addi sp,sp,128
+  	ld ra,48(sp)
+  	ld s0,40(sp)
+  	addi sp,sp,64
   ret
 
   $ dune exec riscv64_instr_test < manytests/do_not_type/002if.ml
@@ -545,44 +764,62 @@
   	addi sp,sp,48
   ret
   fib_acc:
-  	addi sp,sp,-384
-  	sd ra,368(sp)
-  	sd s0,360(sp)
-  	addi s0,sp,384
-  	sd a2,-384(s0)
-  	sd a1,-376(s0)
-  	sd a0,-368(s0)
+  	addi sp,sp,-352
+  	sd ra,336(sp)
+  	sd s0,328(sp)
+  	addi s0,sp,352
+  	sd a2,-352(s0)
+  	sd a1,-344(s0)
+  	sd a0,-336(s0)
   	li t0,1
   beq a2,t0,.tag_anf_op_3
-  	li t1,1
-  	sub t2,a2,t1
-  	sd t2,-32(s0)
-  	add t3,a0,a1
-  	sd t3,-40(s0)
-  	sd t2,-48(s0)
-  	sd t3,-56(s0)
   	lui a0,%hi(fib_acc)
   	addi a0,a0,%lo(fib_acc)
-  	ld a3,-376(s0)
+  	ld a3,-344(s0)
   	li a2,1
   	li a1,3
   call part_app
-  	sd a0,-64(s0)
+  	sd a0,-32(s0)
   	lui a0,%hi(ab)
   	addi a0,a0,%lo(ab)
-  	ld a3,-368(s0)
+  	ld a3,-336(s0)
+  	li a2,1
+  	li a1,3
+  call part_app
+  	sd a0,-40(s0)
+  	ld a0,-40(s0)
+  	ld a3,-344(s0)
+  	li a2,1
+  	li a1,0
+  call part_app
+  	sd a0,-48(s0)
+  	ld a0,-48(s0)
+  	ld a3,-352(s0)
+  	li a2,1
+  	li a1,0
+  call part_app
+  	sd a0,-56(s0)
+  	ld a0,-32(s0)
+  	ld a3,-56(s0)
+  	li a2,1
+  	li a1,0
+  call part_app
+  	sd a0,-64(s0)
+  	lui a0,%hi(n1)
+  	addi a0,a0,%lo(n1)
+  	ld a3,-336(s0)
   	li a2,1
   	li a1,3
   call part_app
   	sd a0,-72(s0)
   	ld a0,-72(s0)
-  	ld a3,-376(s0)
+  	ld a3,-344(s0)
   	li a2,1
   	li a1,0
   call part_app
   	sd a0,-80(s0)
   	ld a0,-80(s0)
-  	ld a3,-384(s0)
+  	ld a3,-352(s0)
   	li a2,1
   	li a1,0
   call part_app
@@ -592,41 +829,16 @@
   	li a2,1
   	li a1,0
   call part_app
-  	sd a0,-96(s0)
-  	lui a0,%hi(n1)
-  	addi a0,a0,%lo(n1)
-  	ld a3,-368(s0)
-  	li a2,1
-  	li a1,3
-  call part_app
-  	sd a0,-104(s0)
-  	ld a0,-104(s0)
-  	ld a3,-376(s0)
-  	li a2,1
-  	li a1,0
-  call part_app
-  	sd a0,-112(s0)
-  	ld a0,-112(s0)
-  	ld a3,-384(s0)
-  	li a2,1
-  	li a1,0
-  call part_app
-  	sd a0,-120(s0)
-  	ld a0,-96(s0)
-  	ld a3,-120(s0)
-  	li a2,1
-  	li a1,0
-  call part_app
   	j .tag_anf_op_3_t
   .tag_anf_op_3:
-  	ld t3,-376(s0)
-  	sd a0,-128(s0)
-  	mv a0,t3
+  	ld t0,-344(s0)
+  	sd a0,-96(s0)
+  	mv a0,t0
   .tag_anf_op_3_t:
   	mv a0,a0
-  	ld ra,368(sp)
-  	ld s0,360(sp)
-  	addi sp,sp,384
+  	ld ra,336(sp)
+  	ld s0,328(sp)
+  	addi sp,sp,352
   ret
   fib:
   	addi sp,sp,-128
@@ -635,7 +847,7 @@
   	addi s0,sp,128
   	sd a0,-128(s0)
   	li t0,2
-  blt a0,t0,.tag_anf_op_16
+  blt a0,t0,.tag_anf_op_14
   	li t1,1
   	sub t2,a0,t1
   	li t3,2
@@ -658,12 +870,12 @@
   	li a2,1
   	li a1,1
   call part_app
-  	j .tag_anf_op_16_t
-  .tag_anf_op_16:
+  	j .tag_anf_op_14_t
+  .tag_anf_op_14:
   	ld t3,-128(s0)
   	sd a0,-64(s0)
   	mv a0,t3
-  .tag_anf_op_16_t:
+  .tag_anf_op_14_t:
   	mv a0,a0
   	ld ra,120(sp)
   	ld s0,112(sp)
@@ -818,41 +1030,18 @@
   	addi sp,sp,80
   ret
   test3:
-  	addi sp,sp,-160
-  	sd ra,152(sp)
-  	sd s0,144(sp)
-  	addi s0,sp,160
-  	sd a2,-160(s0)
-  	sd a1,-152(s0)
-  	sd a0,-144(s0)
-  	lui a0,%hi(print_int)
-  	addi a0,a0,%lo(print_int)
-  	ld a3,-144(s0)
-  	li a2,1
-  	li a1,1
-  call part_app
+  	addi sp,sp,-48
+  	sd ra,32(sp)
+  	sd s0,24(sp)
+  	addi s0,sp,48
+  	sd a2,-48(s0)
+  	sd a1,-40(s0)
   	sd a0,-32(s0)
-  	sd a0,-40(s0)
-  	lui a0,%hi(print_int)
-  	addi a0,a0,%lo(print_int)
-  	ld a3,-152(s0)
-  	li a2,1
-  	li a1,1
-  call part_app
-  	sd a0,-48(s0)
-  	sd a0,-56(s0)
-  	lui a0,%hi(print_int)
-  	addi a0,a0,%lo(print_int)
-  	ld a3,-160(s0)
-  	li a2,1
-  	li a1,1
-  call part_app
-  	sd a0,-64(s0)
-  	li a1,0
-  	mv a0,a1
-  	ld ra,152(sp)
-  	ld s0,144(sp)
-  	addi sp,sp,160
+  	li t0,0
+  	mv a0,t0
+  	ld ra,32(sp)
+  	ld s0,24(sp)
+  	addi sp,sp,48
   ret
   test10:
   	addi sp,sp,-160
@@ -1522,16 +1711,4 @@
   	ld s0,104(sp)
   	addi sp,sp,128
   ret
-
-  $ dune exec riscv64_instr_test < manytests/typed/007order.ml
-  : end_of_input
-
-  $ dune exec riscv64_instr_test < manytests/typed/008ascription.ml
-  : end_of_input
-
-  $ dune exec riscv64_instr_test < manytests/typed/015tuples.ml
-  : end_of_input
-
-  $ dune exec riscv64_instr_test < manytests/typed/016lists.ml
-  : end_of_input
 
