@@ -155,7 +155,7 @@ let rec pp_ll_expr expr =
       ""
       [ "if ("; pp_ll_exp<span data-count="0">r</span> e1; ") then ("; pp_ll_exp<span data-count="0">r</span> e2; ") else ("; pp_ll_exp<span data-count="0">r</span> e3; ")" ]
   | <span data-count="0">L</span>App (e, args) -&gt;
-    concat "" [ ""; pp_ll_exp<span data-count="0">r</span> e; " "; conca<span data-count="0">t</span> " " (List.ma<span data-count="0">p</span> pp_ll_expr args); "" ]
+    concat "" [ "("; pp_ll_exp<span data-count="0">r</span> e; " "; conca<span data-count="0">t</span> " " (List.ma<span data-count="0">p</span> pp_ll_expr args); ")" ]
   | <span data-count="0">L</span>In (id, e1, e2) -&gt;
     concat "" [ "let "; id; " = ("; pp_ll_exp<span data-count="0">r</span> e1; " in "; pp_ll_exp<span data-count="0">r</span> e2; ")" ]
 ;;
