@@ -184,32 +184,70 @@ let rec lifting cc_ast fun_ids g_args stack lvl res =
       | _ -> Error "Apply on not correct expr")
 ;;
 
-let rec unwrap_app expr =
+let rec drop n lst =
+  match n, lst with
+  | 0, _ -> lst
+  | _, [] -> []
+  | _, _ :: tail -> drop (n - 1) tail
+;;
+
+let take n lst =
+  let rec helper n lst acc =
+    match n, lst with
+    | 0, _ -> acc
+    | _, [] -> acc
+    | _, hd :: tail -> helper (n - 1) tail (hd :: acc)
+  in
+  List.rev (helper n lst [])
+;;
+
+let rec unwrap_app args_cnt expr =
   match expr with
-  | LApp (id, args) ->
-    (match args with
-     | [] -> expr
-     | [ arg ] -> LApp (unwrap_app id, [ unwrap_app arg ])
-     | fst :: args ->
-       List.fold_left
-         (fun app arg -> LApp (app, [ unwrap_app arg ]))
-         (LApp (unwrap_app id, [ unwrap_app fst ]))
-         args)
+  | LApp (e_id, args) ->
+    (match e_id with
+     | LId id when Option.is_some (List.find_opt (fun (name, _) -> name = id) args_cnt) ->
+       (match List.find_opt (fun (name, _) -> name = id) args_cnt with
+        | None -> expr
+        | Some (_, arg_cnt) ->
+          (* print_string (id^" "^(string_of_int arg_cnt)^"\n"); *)
+          let other_args =
+            List.map (fun arg -> unwrap_app args_cnt arg) (drop arg_cnt args)
+          in
+          (match other_args with
+           | [] -> LApp (LId id, List.map (fun arg -> unwrap_app args_cnt arg) args)
+           | _ ->
+             let applied_args =
+               List.map (fun arg -> unwrap_app args_cnt arg) (take arg_cnt args)
+             in
+             List.fold_left
+               (fun app arg -> LApp (app, [ arg ]))
+               (LApp (LId id, applied_args))
+               other_args))
+     | _ ->
+       (match args with
+        | [] -> expr
+        | [ arg ] -> LApp (unwrap_app args_cnt e_id, [ unwrap_app args_cnt arg ])
+        | fst :: args ->
+          List.fold_left
+            (fun app arg -> LApp (app, [ unwrap_app args_cnt arg ]))
+            (LApp (unwrap_app args_cnt e_id, [ unwrap_app args_cnt fst ]))
+            args))
   | LId _ | LConst _ -> expr
-  | LNot e -> LNot (unwrap_app e)
-  | LOr (e1, e2) -> LOr (unwrap_app e1, unwrap_app e2)
-  | LAnd (e1, e2) -> LAnd (unwrap_app e1, unwrap_app e2)
-  | LEq (e1, e2) -> LEq (unwrap_app e1, unwrap_app e2)
-  | LGt (e1, e2) -> LGt (unwrap_app e1, unwrap_app e2)
-  | LLt (e1, e2) -> LLt (unwrap_app e1, unwrap_app e2)
-  | LGte (e1, e2) -> LGte (unwrap_app e1, unwrap_app e2)
-  | LLte (e1, e2) -> LLte (unwrap_app e1, unwrap_app e2)
-  | LAdd (e1, e2) -> LAdd (unwrap_app e1, unwrap_app e2)
-  | LSub (e1, e2) -> LSub (unwrap_app e1, unwrap_app e2)
-  | LMul (e1, e2) -> LMul (unwrap_app e1, unwrap_app e2)
-  | LDiv (e1, e2) -> LDiv (unwrap_app e1, unwrap_app e2)
-  | LIf (e1, e2, e3) -> LIf (unwrap_app e1, unwrap_app e2, unwrap_app e3)
-  | LIn (id, e1, e2) -> LIn (id, unwrap_app e1, unwrap_app e2)
+  | LNot e -> LNot (unwrap_app args_cnt e)
+  | LOr (e1, e2) -> LOr (unwrap_app args_cnt e1, unwrap_app args_cnt e2)
+  | LAnd (e1, e2) -> LAnd (unwrap_app args_cnt e1, unwrap_app args_cnt e2)
+  | LEq (e1, e2) -> LEq (unwrap_app args_cnt e1, unwrap_app args_cnt e2)
+  | LGt (e1, e2) -> LGt (unwrap_app args_cnt e1, unwrap_app args_cnt e2)
+  | LLt (e1, e2) -> LLt (unwrap_app args_cnt e1, unwrap_app args_cnt e2)
+  | LGte (e1, e2) -> LGte (unwrap_app args_cnt e1, unwrap_app args_cnt e2)
+  | LLte (e1, e2) -> LLte (unwrap_app args_cnt e1, unwrap_app args_cnt e2)
+  | LAdd (e1, e2) -> LAdd (unwrap_app args_cnt e1, unwrap_app args_cnt e2)
+  | LSub (e1, e2) -> LSub (unwrap_app args_cnt e1, unwrap_app args_cnt e2)
+  | LMul (e1, e2) -> LMul (unwrap_app args_cnt e1, unwrap_app args_cnt e2)
+  | LDiv (e1, e2) -> LDiv (unwrap_app args_cnt e1, unwrap_app args_cnt e2)
+  | LIf (e1, e2, e3) ->
+    LIf (unwrap_app args_cnt e1, unwrap_app args_cnt e2, unwrap_app args_cnt e3)
+  | LIn (id, e1, e2) -> LIn (id, unwrap_app args_cnt e1, unwrap_app args_cnt e2)
 ;;
 
 let default_res num = Result (LId "Error", [], [], num)
@@ -237,10 +275,13 @@ let lambda_lifting cc_ast =
   Result ast
   >>= fun g_ast ->
   Result
-    (List.fold_left
-       (fun acc ast ->
-         match ast with
-         | LFun (id, args, e) -> acc @ [ LFun (id, args, unwrap_app e) ])
-       []
-       g_ast)
+    ((fun (e, _) -> e)
+       (List.fold_left
+          (fun (acc, acc_cnt) ast ->
+            match ast with
+            | LFun (id, args, e) ->
+              ( acc @ [ LFun (id, args, unwrap_app ((id, List.length args) :: acc_cnt) e) ]
+              , (id, List.length args) :: acc_cnt ))
+          ([], [])
+          g_ast))
 ;;

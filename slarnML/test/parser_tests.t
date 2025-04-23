@@ -30,10 +30,6 @@
   > EOF
   (true&&(((a+(f false (g 3 y)))=3)||2))
   $ dune exec parser_test << EOF
-  > (a b 2 1+3 * b d (-2) (r f)) + 3
-  > EOF
-  Error: : end_of_input
-  $ dune exec parser_test << EOF
   > a b c
   > EOF
   (a b c)

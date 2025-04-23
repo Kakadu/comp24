@@ -151,12 +151,12 @@ int64_t app_n(struct Func *f) {
 }
 
 int64_t app(struct Func *f, uint8_t cnt, int64_t *args) {
-    fprintf(stdout, "Warning: %p(%ld) [%d %d]", f->ptr, (int64_t)f, f->argscnt, f->cnt);
-    if (cnt > 0) {
-        fprintf(stdout, " -> %ld\n", args[0]);
-    } else {
-        fprintf(stdout, "\n");
-    }
+    // fprintf(stdout, "Warning: %p(%ld) [%d %d]", f->ptr, (int64_t)f, f->argscnt, f->cnt);
+    // if (cnt > 0) {
+    //     fprintf(stdout, " -> %ld\n", args[0]);
+    // } else {
+    //     fprintf(stdout, "\n");
+    // }
 
     if (f == NULL || args == NULL) {
         fprintf(stderr, "Error: NULL pointer in app function\n");
@@ -176,7 +176,7 @@ int64_t app(struct Func *f, uint8_t cnt, int64_t *args) {
         int64_t ret = app_n(f);
         
         if (new_cnt > f->argscnt) {
-            fprintf(stdout, "Warning: overflow args\n");
+            // fprintf(stdout, "Warning: overflow args\n");
             int64_t new_args[MAX_ARGS];
             for (int i = 0; i < new_cnt - f->argscnt && i < MAX_ARGS; i++) {
                 new_args[i] = args[i + (f->argscnt - f_cnt)];
@@ -225,7 +225,7 @@ int64_t part_app(void *f_ptr, int argcnt, int appcnt, ...) {
     last_app = (last_app + 1) % MAX_APPS;
     
     int64_t ret = app(&part_apps[app_idx], appcnt, args);
-    fprintf(stdout, "Result: %ld\n", ret);
+    // fprintf(stdout, "Result: %ld\n", ret);
     return ret;
 }
 
