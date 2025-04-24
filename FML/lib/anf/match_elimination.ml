@@ -123,7 +123,12 @@ let rec expr_to_mexpr = function
          List.fold tl ~init:h ~f:(fun acc c ->
            Me_EApp (Me_EApp (Me_EIdentifier "( && )", acc), c))
        in
-       return @@ Me_EFun (args, Me_EIf (check, expr, Me_EIdentifier "fail")))
+       return
+       @@ Me_EFun
+            ( args
+            , Me_EIf
+                (check, expr, Me_EApp (Me_EIdentifier "fail_match", Me_EConst (Me_Cint 1)))
+            ))
   | ELetIn (rec_flag, pat, e1, e2) ->
     let ids = pattern_remove pat in
     let* e1' = expr_to_mexpr e1 in
@@ -164,22 +169,25 @@ let rec expr_to_mexpr = function
 
 and desugar_match expr branches =
   let* expr' = expr_to_mexpr expr in
-  List.fold_right branches ~init:(return @@ Me_EIdentifier "fail") ~f:(fun (p, e) acc ->
-    let check =
-      match pattern_checks expr' p with
-      | [] -> Me_EConst (Me_CBool true)
-      | h :: tl ->
-        List.fold_right tl ~init:h ~f:(fun c acc ->
-          Me_EApp (Me_EApp (Me_EIdentifier "( && )", acc), c))
-    in
-    let bindings = pattern_bindings expr' p in
-    let* e' = expr_to_mexpr e in
-    let expr =
-      List.fold_right bindings ~init:e' ~f:(fun (name, e) acc ->
-        Me_ELet (NoRec, name, e, acc))
-    in
-    let* acc = acc in
-    return @@ Me_EIf (check, expr, acc))
+  List.fold_right
+    branches
+    ~init:(return @@ Me_EApp (Me_EIdentifier "fail_match", Me_EConst (Me_Cint 1)))
+    ~f:(fun (p, e) acc ->
+      let check =
+        match pattern_checks expr' p with
+        | [] -> Me_EConst (Me_CBool true)
+        | h :: tl ->
+          List.fold_right tl ~init:h ~f:(fun c acc ->
+            Me_EApp (Me_EApp (Me_EIdentifier "( && )", acc), c))
+      in
+      let bindings = pattern_bindings expr' p in
+      let* e' = expr_to_mexpr e in
+      let expr =
+        List.fold_right bindings ~init:e' ~f:(fun (name, e) acc ->
+          Me_ELet (NoRec, name, e, acc))
+      in
+      let* acc = acc in
+      return @@ Me_EIf (check, expr, acc))
 ;;
 
 let decl_to_pe_decl decls =

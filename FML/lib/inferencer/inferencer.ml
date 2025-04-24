@@ -657,7 +657,7 @@ let start_env =
     ; "hd_list_get", TFunction (TList (TVar 1), TVar 1)
     ; "tl_list_get", TFunction (TList (TVar 1), TList (TVar 1))
     ; "tuple_get", TFunction (TVar 1, TFunction (TInt, TVar 2))
-    ; "fail", TVar 1
+    ; "fail_match", TFunction (TInt, TVar 1)
     ]
   in
   let env = TypeEnv.empty in

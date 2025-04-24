@@ -31,7 +31,7 @@
   1
   else if (is_empty xs)
   then 0
-  else fail)
+  else (fail_match 1))
 
   $ ./c_conv_runner.exe << EOF
   > let is_empty x = x+1
@@ -46,7 +46,7 @@
   else if (is_cons xs)
   then let tl = (tl_list_get xs) in
   ((( + ) 1) (length xs))
-  else fail)
+  else (fail_match 1))
 
   $ ./c_conv_runner.exe << EOF
   > let (a, b) = (5,6)
@@ -80,7 +80,7 @@
   then 12
   else if true
   then 325
-  else fail)
+  else (fail_match 1))
 
   $ ./c_conv_runner.exe < manytests/typed/001fac.ml
   let rec fac = (fun n -> if ((( <= ) n) 1)
@@ -193,7 +193,7 @@
   then let h = (hd_list_get xs) in
   let tl = (tl_list_get xs) in
   (((map f) tl) ((((fun f h k tl_ac0 -> (k ((f h)::tl_ac0))) f) h) k))
-  else fail)
+  else (fail_match 1))
   
   let rec iter = (fun f xs -> if (is_empty xs)
   then ()
@@ -202,7 +202,7 @@
   let tl = (tl_list_get xs) in
   let w = (f h) in
   ((iter f) tl)
-  else fail)
+  else (fail_match 1))
   
   let main = ((iter print_int) (((map (fun x -> ((( + ) x) 1))) (1::(2::(3::[])))) (fun x -> x)))
   $ ./c_conv_runner.exe < manytests/typed/012fibcps.ml
@@ -220,7 +220,7 @@
   then let h = (hd_list_get xs) in
   let tl = (tl_list_get xs) in
   ((f h) (((fold_right f) acc) tl))
-  else fail)
+  else (fail_match 1))
   
   let foldl = ((fun fold_right f a bs -> ((((fold_right ((fun f b g x -> (g ((f x) b))) f)) id) bs) a)) fold_right)
   
@@ -271,7 +271,7 @@
   then let h = (hd_list_get xs) in
   let tl = (tl_list_get xs) in
   ((( + ) 1) (length tl))
-  else fail)
+  else (fail_match 1))
   
   let length_tail = let rec helper = (fun acc xs -> if (is_empty xs)
   then acc
@@ -279,7 +279,7 @@
   then let h = (hd_list_get xs) in
   let tl = (tl_list_get xs) in
   ((helper ((( + ) acc) 1)) tl)
-  else fail) in
+  else (fail_match 1)) in
   (helper 0)
   
   let rec map = (fun f xs -> if (is_empty xs)
@@ -303,7 +303,7 @@
   let d = (hd_list_get (tl_list_get (tl_list_get (tl_list_get xs)))) in
   let tl = (tl_list_get (tl_list_get (tl_list_get (tl_list_get xs)))) in
   ((f a)::((f b)::((f c)::((f d)::((map f) tl)))))
-  else fail)
+  else (fail_match 1))
   
   let rec append = (fun xs ys -> if (is_empty xs)
   then ys
@@ -311,7 +311,7 @@
   then let x = (hd_list_get xs) in
   let xs_ac0 = (tl_list_get xs) in
   (x::((append xs_ac0) ys))
-  else fail)
+  else (fail_match 1))
   
   let concat = let rec helper = (fun append xs -> if (is_empty xs)
   then []
@@ -319,7 +319,7 @@
   then let h = (hd_list_get xs) in
   let tl = (tl_list_get xs) in
   ((append h) ((helper append) tl))
-  else fail) in
+  else (fail_match 1)) in
   (helper append)
   
   let rec iter = (fun f xs -> if (is_empty xs)
@@ -329,7 +329,7 @@
   let tl = (tl_list_get xs) in
   let () = (f h) in
   ((iter f) tl)
-  else fail)
+  else (fail_match 1))
   
   let rec cartesian = (fun xs ys -> if (is_empty xs)
   then []
@@ -337,7 +337,7 @@
   then let h = (hd_list_get xs) in
   let tl = (tl_list_get xs) in
   ((append ((map ((fun h a -> (h, a)) h)) ys)) ((cartesian tl) ys))
-  else fail)
+  else (fail_match 1))
   
   let main = let () = ((iter print_int) (1::(2::(3::[])))) in
   let () = (print_int (length ((cartesian (1::(2::[]))) (1::(2::(3::(4::[]))))))) in

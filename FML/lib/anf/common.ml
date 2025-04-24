@@ -36,7 +36,7 @@ let builtins =
   ; "is_cons"
   ; "hd_list_get"
   ; "tl_list_get"
-  ; "fail"
+  ; "fail_match"
   ]
 ;;
 

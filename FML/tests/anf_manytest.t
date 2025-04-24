@@ -83,7 +83,7 @@
   else let anf13 = is_empty xs in
   if anf13
   then 0
-  else fail
+  else fail_match 1
   ;;
   
   Типы до приведения в ANF:
@@ -110,7 +110,7 @@
   then let tl = tl_list_get xs in
   let anf2 = length xs in
   ( + ) 1 anf2
-  else fail
+  else fail_match 1
   ;;
   
   Типы до приведения в ANF:
@@ -191,7 +191,7 @@
   then 12
   else if true
   then 325
-  else fail
+  else fail_match 1
   ;;
   
   Типы до приведения в ANF:
@@ -526,7 +526,7 @@
   let tl = tl_list_get xs in
   let anf4 = lam_ll0 f h k in
   map f tl anf4
-  else fail
+  else fail_match 1
   ;;
   
   let rec iter f xs = let anf5 = is_empty xs in
@@ -538,7 +538,7 @@
   let tl = tl_list_get xs in
   let w = f h in
   iter f tl
-  else fail
+  else fail_match 1
   ;;
   
   let lam_ll1 x = ( + ) x 1
@@ -614,7 +614,7 @@
   let tl = tl_list_get xs in
   let anf2 = fold_right f acc tl in
   f h anf2
-  else fail
+  else fail_match 1
   ;;
   
   let lam_ll1 f b g x = let anf3 = f x b in
@@ -761,7 +761,7 @@
   let tl = tl_list_get xs in
   let anf2 = length tl in
   ( + ) 1 anf2
-  else fail
+  else fail_match 1
   ;;
   
   let rec helper_ll0 acc xs = let anf3 = is_empty xs in
@@ -773,7 +773,7 @@
   let tl = tl_list_get xs in
   let anf5 = ( + ) acc 1 in
   helper_ll0 anf5 tl
-  else fail
+  else fail_match 1
   ;;
   
   let length_tail = helper_ll0 0
@@ -869,7 +869,7 @@
   let anf70 = (anf71::anf72) in
   let anf68 = (anf69::anf70) in
   (anf67::anf68)
-  else fail
+  else fail_match 1
   ;;
   
   let rec append xs ys = let anf75 = is_empty xs in
@@ -881,7 +881,7 @@
   let xs_ac0 = tl_list_get xs in
   let anf77 = append xs_ac0 ys in
   (x::anf77)
-  else fail
+  else fail_match 1
   ;;
   
   let rec helper_ll1 append xs = let anf78 = is_empty xs in
@@ -893,7 +893,7 @@
   let tl = tl_list_get xs in
   let anf80 = helper_ll1 append tl in
   append h anf80
-  else fail
+  else fail_match 1
   ;;
   
   let concat = helper_ll1 append
@@ -908,7 +908,7 @@
   let tl = tl_list_get xs in
   let () = f h in
   iter f tl
-  else fail
+  else fail_match 1
   ;;
   
   let lam_ll2 h a = (h, a)
@@ -925,7 +925,7 @@
   let anf87 = lam_ll2 h in
   let anf86 = map anf87 ys in
   append anf86 anf85
-  else fail
+  else fail_match 1
   ;;
   
   let main = let anf90 = (3::[]) in
