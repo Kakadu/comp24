@@ -88,8 +88,10 @@ let tuple el =
           (el <* skip_empty))
 ;;
 
-let arguments = tuple identifier <|> many identifier
-let arguments1 = tuple identifier <|> many1 identifier
+let unit = skip_empty *> (parens @@ (string "" *> return "()"))
+
+let arguments = tuple (identifier <|> unit) <|> many (identifier <|> unit)
+let arguments1 = tuple (identifier <|> unit) <|> many1 (identifier <|> unit)
 
 let declaration is_rec =
   skip_empty *> identifier
@@ -349,7 +351,7 @@ let%test _ = parse_ok "(a, b)" [ Id "a"; Id "b" ]
 let%test _ = parse_ok " ( a , b )" [ Id "a"; Id "b" ]
 let%test _ = parse_fail "(a b)"
 let%test _ = parse_fail "(a, )"
-let%test _ = parse_fail "()"
+(* let%test _ = parse_fail "()" *)
 
 (*== Test parse argiments ==*)
 (* TODO: arguments can accept Const(CUnit, CInt, CBool) and Id(string) *)
@@ -364,7 +366,7 @@ let%test _ = parse_ok "(a)" [ "a" ]
 let%test _ = parse_ok "(a, b)" [ "a"; "b" ]
 let%test _ = parse_fail "(a b)"
 let%test _ = parse_fail "(a, )"
-let%test _ = parse_fail "()"
+(* let%test _ = parse_fail "()" *)
 
 (*== Test parse declaration ==*)
 let parse_ok flag = test_ok @@ declaration flag
