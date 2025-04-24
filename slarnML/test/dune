@@ -1,0 +1,157 @@
+(executable
+ (name parser_test)
+ (public_name parser_test)
+ (modules parser_test)
+ (preprocess
+  (pps bisect_ppx))
+ (libraries slarnML.lib stdio))
+
+(executable
+ (name clos_conv_test)
+ (public_name clos_conv_test)
+ (modules clos_conv_test)
+ (preprocess
+  (pps bisect_ppx))
+ (libraries slarnML.lib stdio))
+
+(executable
+ (name lambda_lifting_test)
+ (public_name lambda_lifting_test)
+ (modules lambda_lifting_test)
+ (preprocess
+  (pps bisect_ppx))
+ (libraries slarnML.lib stdio))
+
+(executable
+ (name anf_conv_test)
+ (public_name anf_conv_test)
+ (modules anf_conv_test)
+ (preprocess
+  (pps bisect_ppx))
+ (libraries slarnML.lib stdio))
+
+(executable
+ (name riscv64_instr_test)
+ (public_name riscv64_instr_test)
+ (modules riscv64_instr_test)
+ (preprocess
+  (pps bisect_ppx))
+ (libraries slarnML.lib stdio))
+
+(cram
+ (applies_to parser_tests)
+ (deps
+  manytests/do_not_type/001.ml
+  manytests/do_not_type/002if.ml
+  manytests/do_not_type/003occurs.ml
+  manytests/typed/001fac.ml
+  manytests/typed/002fac.ml
+  manytests/typed/003fib.ml
+  manytests/typed/004manyargs.ml
+  manytests/typed/005fix.ml
+  manytests/typed/006partial.ml
+  manytests/typed/006partial2.ml
+  manytests/typed/006partial3.ml
+  manytests/typed/007order.ml
+  manytests/typed/008ascription.ml
+  manytests/typed/015tuples.ml
+  manytests/typed/016lists.ml))
+
+(cram
+ (applies_to clos_conv_test)
+ (deps
+  manytests/do_not_type/001.ml
+  manytests/do_not_type/002if.ml
+  manytests/do_not_type/003occurs.ml
+  manytests/typed/001fac.ml
+  manytests/typed/002fac.ml
+  manytests/typed/003fib.ml
+  manytests/typed/004manyargs.ml
+  manytests/typed/005fix.ml
+  manytests/typed/006partial.ml
+  manytests/typed/006partial2.ml
+  manytests/typed/006partial3.ml
+  manytests/typed/007order.ml
+  manytests/typed/008ascription.ml
+  manytests/typed/015tuples.ml
+  manytests/typed/016lists.ml))
+
+(cram
+ (applies_to lambda_lifting_test)
+ (deps
+  manytests/do_not_type/001.ml
+  manytests/do_not_type/002if.ml
+  manytests/do_not_type/003occurs.ml
+  manytests/typed/001fac.ml
+  manytests/typed/002fac.ml
+  manytests/typed/003fib.ml
+  manytests/typed/004manyargs.ml
+  manytests/typed/005fix.ml
+  manytests/typed/006partial.ml
+  manytests/typed/006partial2.ml
+  manytests/typed/006partial3.ml
+  manytests/typed/007order.ml
+  manytests/typed/008ascription.ml
+  manytests/typed/015tuples.ml
+  manytests/typed/016lists.ml))
+
+(cram
+ (applies_to anf_conv_test)
+ (deps
+  manytests/do_not_type/001.ml
+  manytests/do_not_type/002if.ml
+  manytests/do_not_type/003occurs.ml
+  manytests/typed/001fac.ml
+  manytests/typed/002fac.ml
+  manytests/typed/003fib.ml
+  manytests/typed/004manyargs.ml
+  manytests/typed/005fix.ml
+  manytests/typed/006partial.ml
+  manytests/typed/006partial2.ml
+  manytests/typed/006partial3.ml
+  manytests/typed/007order.ml
+  manytests/typed/008ascription.ml
+  manytests/typed/015tuples.ml
+  manytests/typed/016lists.ml))
+
+(cram
+ (applies_to riscv64_instr_test)
+ (deps
+  manytests/do_not_type/001.ml
+  manytests/do_not_type/002if.ml
+  manytests/do_not_type/003occurs.ml
+  manytests/typed/001fac.ml
+  manytests/typed/002fac.ml
+  manytests/typed/003fib.ml
+  manytests/typed/004manyargs.ml
+  manytests/typed/005fix.ml
+  manytests/typed/006partial.ml
+  manytests/typed/006partial2.ml
+  manytests/typed/006partial3.ml
+  manytests/typed/007order.ml
+  manytests/typed/008ascription.ml
+  manytests/typed/015tuples.ml
+  manytests/typed/016lists.ml))
+
+(cram
+ (applies_to exec_test)
+ (deps
+  print.S
+  part_app.c
+  ../lib/riscv64/print.S
+  ../lib/riscv64/part_app.c
+  manytests/do_not_type/001.ml
+  manytests/do_not_type/002if.ml
+  manytests/do_not_type/003occurs.ml
+  manytests/typed/001fac.ml
+  manytests/typed/002fac.ml
+  manytests/typed/003fib.ml
+  manytests/typed/004manyargs.ml
+  manytests/typed/005fix.ml
+  manytests/typed/006partial.ml
+  manytests/typed/006partial2.ml
+  manytests/typed/006partial3.ml
+  manytests/typed/007order.ml
+  manytests/typed/008ascription.ml
+  manytests/typed/015tuples.ml
+  manytests/typed/016lists.ml))
