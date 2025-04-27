@@ -6,7 +6,7 @@
 
 int64_t print_int(int64_t x)
 {
-    printf("%ld\n", x);
+    printf("%ld", x);
     return 0;
 }
 
@@ -106,7 +106,7 @@ int64_t _apply(closure_t *closure, int new_args_num, va_list *args)
     }
 }
 
-int64_t apply(closure_t *closure, int new_args_num, ...)
+int64_t apply_args(closure_t *closure, int new_args_num, ...)
 {
     va_list args;
     va_start(args, new_args_num);

@@ -11,16 +11,16 @@ let () =
     | Ok parsed ->
       (match Inferencer.run_program_inferencer parsed with
        | Ok types -> Ok (parsed, types)
-       | Error _ -> Error (Format.asprintf "Infer error."))
+       | Error _ -> Error (Format.asprintf "Infer error:"))
     | Error e -> Error (Format.sprintf "Parsing error: %s" e)
   in
   match parse_and_infer input with
   | Ok (ast, _) ->
-    let bind, cnt, ast = Pattern_elim.run_pe ast in
-    let bind, cnt, ast = Alpha_conv.run_alpha_conv bind cnt ast in
-    let ast = Closure_conv.run_cc ast in
-    let bind, cnt, ast = Lambda_lifting.run_ll bind cnt ast in
-    let _, _, ast = Anf.run_anf bind cnt ast in
-    Codegen.compile_program ast
+    let ast = A_conv.ac_program ast in
+    let ast_me = Match_elimination.match_elimination ast in
+    let ast_cc = C_conv.cc_program ast_me in
+    let ast_ll = Lambda_lift.lambda_lift ast_cc in
+    let ast_anf = Anf.anf ast_ll in
+    Gen.compile_program ast_anf
   | Error message -> Format.printf "%s" message
 ;;

@@ -17,7 +17,8 @@
   Match_elimination
   Anf_ast
   Anf
-  Lambda_lift)
+  Lambda_lift
+  Gen)
  (modules_without_implementation inf_errors)
  (libraries base angstrom llvm llvm.analysis llvm.executionengine)
  (preprocess
