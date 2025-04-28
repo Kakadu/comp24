@@ -1,5 +1,5 @@
 (rule
- (targets runtime.a)
+ (targets runtime.o)
  (deps runtime.c)
  (action
   (run clang-16 -c runtime.c -o %{targets})))

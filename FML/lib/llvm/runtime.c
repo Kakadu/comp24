@@ -38,13 +38,19 @@ typedef struct
 } closure_t;
 
 int64_t
-new_closure(int64_t f_ptr, int64_t args_num)
+create_closure(int64_t f_ptr, int64_t args_num, int64_t args_applied)
 {
     closure_t *closure = malloc(sizeof(closure_t) + args_num * sizeof(int64_t));
     closure->fun_ptr = f_ptr;
     closure->args_num = args_num;
-    closure->args_applied = 0;
+    closure->args_applied = args_applied;
     return (int64_t)closure;
+}
+
+int64_t
+new_closure(int64_t f_ptr, int64_t args_num)
+{
+    return create_closure(f_ptr, args_num, 0);
 }
 
 int64_t call_closure(closure_t *closure)
@@ -78,13 +84,18 @@ int64_t _apply(closure_t *closure, int new_args_num, va_list *args)
 
     if (new_args_num < args_to_apply)
     {
+        closure_t *new_closure = (closure_t *)create_closure(closure->fun_ptr, closure->args_num, closure->args_applied + new_args_num);
+        for (int64_t i = 0; i < closure->args_applied; i++)
+        {
+            new_closure->args[i] = closure->args[i];
+        }
+
         for (int64_t i = 0; i < new_args_num; i++)
         {
             int64_t arg = va_arg(*args, int64_t);
-            closure->args[closure->args_applied + i] = arg;
-            closure->args_applied += 1;
+            new_closure->args[closure->args_applied + i] = arg;
         }
-        return (int64_t)closure;
+        return (int64_t)new_closure;
     }
     else
     {
@@ -97,7 +108,6 @@ int64_t _apply(closure_t *closure, int new_args_num, va_list *args)
         int64_t res = call_closure(closure);
 
         new_args_num -= args_to_apply;
-        // free(closure);
         if (new_args_num == 0)
         {
             return res;

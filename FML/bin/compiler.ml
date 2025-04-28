@@ -21,6 +21,6 @@ let () =
     let ast_cc = C_conv.cc_program ast_me in
     let ast_ll = Lambda_lift.lambda_lift ast_cc in
     let ast_anf = Anf.anf ast_ll in
-    Gen.compile_program ast_anf
+    Codegen.compile_program ast_anf
   | Error message -> Format.printf "%s" message
 ;;

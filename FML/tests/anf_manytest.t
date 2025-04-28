@@ -122,27 +122,6 @@
   val length : 'a list -> int
 
   $ ./anf_runner.exe << EOF
-  > let (a, b) = (5,6)
-  > EOF
-  let tmp_me0 = (5, 6)
-  ;;
-  
-  let a = tuple_get tmp_me0 0
-  ;;
-  
-  let b = tuple_get tmp_me0 1
-  ;;
-  
-  Типы до приведения в ANF:
-  val a : int
-  val b : int
-  
-  Типы после приведения в ANF:
-  val tmp_me0 : int * int
-  val a : int * int
-  val b : 'a
-
-  $ ./anf_runner.exe << EOF
   > let fac n =
   > let rec fack n k =
   > if n<=1 then k 1

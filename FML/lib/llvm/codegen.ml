@@ -11,8 +11,14 @@ let lookup_name name = Hashtbl.find_opt sym_to_value name
 let lookup_type name = Hashtbl.find_opt sym_to_type name
 let add_sym name value = Hashtbl.add sym_to_value name value
 let add_type name ty = Hashtbl.add sym_to_type name ty
+let ctx = global_context ()
+let builder = builder ctx
+let module_ = create_module ctx "FML"
+let target_triple = Llvm_target.Target.default_triple ()
+let () = Llvm.set_target_triple target_triple module_
+let i64_t = i64_type ctx
 
-let id_to_runtime_name = function
+let get_rt_name = function
   | "( + )" -> "rt_add"
   | "( - )" -> "rt_sub"
   | "( * )" -> "rt_mul"
@@ -28,12 +34,58 @@ let id_to_runtime_name = function
   | other -> other
 ;;
 
-let ctx = global_context ()
-let builder = builder ctx
-let module_ = create_module ctx "FML"
-let target_triple = Llvm_target.Target.default_triple ()
-let () = Llvm.set_target_triple target_triple module_
-let i64_t = i64_type ctx
+let compile_immexpr = function
+  | ImmInt n -> const_int i64_t n
+  | ImmBool b -> const_int i64_t (Bool.to_int b)
+  | ImmUnit -> const_int i64_t 0
+  | ImmIdentifier name ->
+    let name = get_rt_name name in
+    (match lookup_function name module_ with
+     | Some f ->
+       let fun_ptr = build_ptrtoint f i64_t "" builder in
+       build_call
+         (function_type i64_t [| i64_t; i64_t |])
+         (Option.get @@ lookup_function "new_closure" module_)
+         [| fun_ptr; const_int i64_t (Array.length (params f)) |]
+         "empty_closure"
+         builder
+     | None ->
+       (match lookup_global name module_ with
+        | Some g -> g
+        | None ->
+          (match lookup_name name with
+           | Some v -> v
+           | None -> failwith ("Unknown variable: " ^ name))))
+  | _ -> failwith "Not_implemented"
+;;
+
+let is_unnop = function
+  | "( ~+ )" | "( ~- )" -> true
+  | _ -> false
+;;
+
+let is_binop = function
+  | "( + )"
+  | "( - )"
+  | "( * )"
+  | "( / )"
+  | "( = )"
+  | "( == )"
+  | "( <> )"
+  | "( != )"
+  | "( > )"
+  | "( >= )"
+  | "( < )"
+  | "( <= )" -> true
+  | _ -> false
+;;
+
+let compile_unnop op x =
+  match op with
+  | "( ~+ )" -> x
+  | "( ~- )" -> build_sub (const_int i64_t 0) x "sub" builder
+  | _ -> failwith ("Invalid operator: " ^ op)
+;;
 
 let compile_binop op x y =
   match op with
@@ -54,40 +106,10 @@ let compile_binop op x y =
   | _ -> failwith ("Invalid operator: " ^ op)
 ;;
 
-let is_binop = function
-  | "( + )" | "( - )" | "( * )" | "( / )" -> true
-  | "( = )" | "( == )" | "( <> )" | "( != )" | "( > )" | "( >= )" | "( < )" | "( <= )" ->
-    true
-  | _ -> false
-;;
-
-let compile_immexpr = function
-  | ImmInt n -> const_int i64_t n
-  | ImmBool b -> const_int i64_t (Bool.to_int b)
-  | ImmUnit -> const_int i64_t 0
-  | ImmIdentifier name ->
-    let name = id_to_runtime_name name in
-    (match lookup_function name module_ with
-     | Some f ->
-       let fun_ptr = build_ptrtoint f i64_t "" builder in
-       build_call
-         (function_type i64_t [| i64_t; i64_t |])
-         (Option.get @@ lookup_function "create_closure" module_)
-         [| fun_ptr; const_int i64_t (Array.length (params f)); const_int i64_t 0 |]
-         "empty_closure"
-         builder
-     | None ->
-       (match lookup_global name module_ with
-        | Some g -> g
-        | None ->
-          (match lookup_name name with
-           | Some v -> v
-           | None -> failwith ("Unknown variable: " ^ name))))
-  | _ -> failwith "Not implemented"
-;;
-
 let rec compile_cexpr = function
-  | CImmExpr expr -> compile_immexpr expr
+  | CImmExpr imm -> compile_immexpr imm
+  | CEApply (name, [ arg1 ]) when is_unnop name ->
+    compile_unnop name (compile_immexpr arg1)
   | CEApply (name, [ arg1; arg2 ]) when is_binop name ->
     compile_binop name (compile_immexpr arg1) (compile_immexpr arg2)
   | CEApply (name, args) ->
@@ -130,14 +152,14 @@ let rec compile_cexpr = function
     let (_ : llvalue) = build_br merge_bb builder in
     position_at_end merge_bb builder;
     phi
-  | _ -> failwith "Not impemented"
+  | _ -> failwith "Not implemented"
 
 and compile_aexpr = function
-  | ACExpr expr -> compile_cexpr expr
-  | ALetIn (name, ce, ae) ->
-    let v = compile_cexpr ce in
+  | ACExpr e -> compile_cexpr e
+  | ALetIn (name, cexpr, aexpr) ->
+    let v = compile_cexpr cexpr in
     add_sym name v;
-    compile_aexpr ae
+    compile_aexpr aexpr
 ;;
 
 let declare_func name args =
@@ -147,37 +169,35 @@ let declare_func name args =
 ;;
 
 let compile_anf_binding (ALet (name, args, body)) =
-  if List.length args = 0 && name <> "main"
-  then (
-    let body = compile_aexpr body in
-    let gvar = define_global name (const_int i64_t 0) module_ in
-    ignore (build_store body gvar builder))
-  else (
-    let func = declare_func name args in
-    let bb = append_block ctx "entry" func in
-    position_at_end bb builder;
-    List.iteri
-      (fun i arg_name ->
-        let arg_value = param func i in
-        set_value_name arg_name arg_value;
-        add_sym arg_name arg_value)
-      args;
-    let body_val = compile_aexpr body in
-    let _ = build_ret body_val builder in
-    ignore func)
+  let func = declare_func name args in
+  let bb = append_block ctx "entry" func in
+  position_at_end bb builder;
+  List.iteri
+    (fun i arg_name ->
+      let arg_value = param func i in
+      set_value_name arg_name arg_value;
+      add_sym arg_name arg_value)
+    args;
+  let body_val = compile_aexpr body in
+  let _ = build_ret body_val builder in
+  ignore func
 ;;
 
 let compile_anf_decl = function
   | ADNoRec bindings ->
     List.iter (fun binding -> ignore (compile_anf_binding binding)) bindings
-  | ADREC bindings ->
+  | ADRec bindings ->
     List.iter (fun (ALet (name, args, _)) -> ignore (declare_func name args)) bindings;
     List.iter (fun binding -> ignore (compile_anf_binding binding)) bindings
+  | Based_value (name, body) ->
+    let body = compile_aexpr body in
+    let gvar = define_global name (const_int i64_t 0) module_ in
+    ignore (build_store body gvar builder)
 ;;
 
 let init_runtime =
-  let runtime_ =
-    [ "create_closure", function_type i64_t [| i64_t; i64_t; i64_t |]
+  let runtime_funs =
+    [ "new_closure", function_type i64_t [| i64_t; i64_t |]
     ; "apply_args", var_arg_function_type i64_t [| i64_t; i64_t; i64_t |]
     ; "print_int", function_type i64_t [| i64_t |]
     ; "rt_add", function_type i64_t [| i64_t; i64_t |]
@@ -195,11 +215,11 @@ let init_runtime =
     ; "fail_match", function_type i64_t [| i64_t |]
     ]
   in
-  List.iter (fun (name, ty) -> ignore (declare_function name ty module_)) runtime_
+  List.map (fun (name, ty) -> declare_function name ty module_) runtime_funs
 ;;
 
 let create_main program =
-  init_runtime;
+  ignore init_runtime;
   List.iter (fun decl -> ignore (compile_anf_decl decl)) program
 ;;
 

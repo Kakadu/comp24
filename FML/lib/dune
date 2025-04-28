@@ -18,7 +18,7 @@
   Anf_ast
   Anf
   Lambda_lift
-  Gen)
+  Codegen)
  (modules_without_implementation inf_errors)
  (libraries base angstrom llvm llvm.analysis llvm.executionengine)
  (preprocess
