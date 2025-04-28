@@ -169,17 +169,17 @@
   let main = let () = (((foo 4) 8) 9) in
   0
   $ ./c_conv_runner.exe < manytests/typed/007order.ml
-  let _start = (fun () () a () b _c () d __ -> let () = (print_int ((( + ) a) b)) in
+  let _start_ac0 = (fun () () a () b _c () d __ -> let () = (print_int ((( + ) a) b)) in
   let () = (print_int __) in
   ((( + ) ((( / ) ((( * ) a) b)) _c)) d))
   
-  let main = (print_int (((((((((_start (print_int 1)) (print_int 2)) 3) (print_int 4)) 100) 1000) (print_int (( ~- ) 1))) 10000) (( ~- ) 555555)))
+  let main = (print_int (((((((((_start_ac0 (print_int 1)) (print_int 2)) 3) (print_int 4)) 100) 1000) (print_int (( ~- ) 1))) 10000) (( ~- ) 555555)))
   $ ./c_conv_runner.exe < manytests/typed/008ascription.ml
   let addi = (fun f g x -> ((f x) (g x)))
   
   let main = let () = (print_int (((addi (fun x b -> if b
   then ((( + ) x) 1)
-  else ((( * ) x) 2))) (fun _start -> ((( = ) ((( / ) _start) 2)) 0))) 4)) in
+  else ((( * ) x) 2))) (fun _start_ac0 -> ((( = ) ((( / ) _start_ac0) 2)) 0))) 4)) in
   0
 
   $ ./c_conv_runner.exe < manytests/typed/009let_poly.ml

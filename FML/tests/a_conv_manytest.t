@@ -595,7 +595,7 @@
     ]
   $ ./a_conv_runner.exe < manytests/typed/007order.ml
   [(NoRecDecl
-      [(DDeclaration ((PIdentifier "_start"),
+      [(DDeclaration ((PIdentifier "_start_ac0"),
           (EFun (PUnit,
              (EFun (PUnit,
                 (EFun ((PIdentifier "a"),
@@ -659,7 +659,8 @@
                              (EApplication (
                                 (EApplication (
                                    (EApplication (
-                                      (EApplication ((EIdentifier "_start"),
+                                      (EApplication (
+                                         (EIdentifier "_start_ac0"),
                                          (EApplication (
                                             (EIdentifier "print_int"),
                                             (EConst (CInt 1))))
@@ -728,12 +729,12 @@
                                 ))
                              ))
                           )),
-                       (EFun ((PIdentifier "_start"),
+                       (EFun ((PIdentifier "_start_ac0"),
                           (EApplication (
                              (EApplication ((EIdentifier "( = )"),
                                 (EApplication (
                                    (EApplication ((EIdentifier "( / )"),
-                                      (EIdentifier "_start"))),
+                                      (EIdentifier "_start_ac0"))),
                                    (EConst (CInt 2))))
                                 )),
                              (EConst (CInt 0))))

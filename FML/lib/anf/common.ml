@@ -37,6 +37,7 @@ let builtins =
   ; "hd_list_get"
   ; "tl_list_get"
   ; "fail_match"
+  ; "_start"
   ]
 ;;
 

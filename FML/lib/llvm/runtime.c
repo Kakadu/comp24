@@ -59,7 +59,7 @@ int64_t call_closure(closure_t *closure)
         args[i] = &closure->args[i];
     }
 
-    if (ffi_prep_cif(&cif, FFI_DEFAULT_ABI, 2, &ffi_type_sint64, args_types) != FFI_OK)
+    if (ffi_prep_cif(&cif, FFI_DEFAULT_ABI, args_n, &ffi_type_sint64, args_types) != FFI_OK)
     {
         fprintf(stderr, "Failed to prepare CIF\n");
         exit(1);
@@ -82,7 +82,7 @@ int64_t _apply(closure_t *closure, int new_args_num, va_list *args)
         {
             int64_t arg = va_arg(*args, int64_t);
             closure->args[closure->args_applied + i] = arg;
-            closure->args_applied += new_args_num;
+            closure->args_applied += 1;
         }
         return (int64_t)closure;
     }
@@ -95,14 +95,16 @@ int64_t _apply(closure_t *closure, int new_args_num, va_list *args)
         }
 
         int64_t res = call_closure(closure);
+
         new_args_num -= args_to_apply;
-        free(closure);
+        // free(closure);
         if (new_args_num == 0)
         {
             return res;
         }
-        closure = (closure_t *)res;
-        return _apply(closure, new_args_num, args);
+
+        closure_t *new_closure = (closure_t *)res;
+        return _apply(new_closure, new_args_num, args);
     }
 }
 
@@ -111,6 +113,6 @@ int64_t apply_args(closure_t *closure, int new_args_num, ...)
     va_list args;
     va_start(args, new_args_num);
 
-    return _apply(closure, new_args_num, &args);
     va_end(args);
+    return _apply(closure, new_args_num, &args);
 }

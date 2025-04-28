@@ -45,8 +45,8 @@ let compile_immexpr = function
        let fun_ptr = build_ptrtoint f i64_t "" builder in
        build_call
          (function_type i64_t [| i64_t; i64_t |])
-         (Option.get @@ lookup_function "create_closure" module_)
-         [| fun_ptr; const_int i64_t (Array.length (params f)); const_int i64_t 0 |]
+         (Option.get @@ lookup_function "new_closure" module_)
+         [| fun_ptr; const_int i64_t (Array.length (params f)) |]
          "empty_closure"
          builder
      | None ->
@@ -57,6 +57,11 @@ let compile_immexpr = function
            | Some v -> v
            | None -> failwith ("Unknown variable: " ^ name))))
   | _ -> failwith "Not_implemented"
+;;
+
+let is_unnop = function
+  | "( ~+ )" | "( ~- )" -> true
+  | _ -> false
 ;;
 
 let is_binop = function
@@ -73,6 +78,13 @@ let is_binop = function
   | "( < )"
   | "( <= )" -> true
   | _ -> false
+;;
+
+let compile_unnop op x =
+  match op with
+  | "( ~+ )" -> x
+  | "( ~- )" -> build_sub (const_int i64_t 0) x "sub" builder
+  | _ -> failwith ("Invalid operator: " ^ op)
 ;;
 
 let compile_binop op x y =
@@ -96,6 +108,8 @@ let compile_binop op x y =
 
 let rec compile_cexpr = function
   | CImmExpr imm -> compile_immexpr imm
+  | CEApply (name, [ arg1 ]) when is_unnop name ->
+    compile_unnop name (compile_immexpr arg1)
   | CEApply (name, [ arg1; arg2 ]) when is_binop name ->
     compile_binop name (compile_immexpr arg1) (compile_immexpr arg2)
   | CEApply (name, args) ->

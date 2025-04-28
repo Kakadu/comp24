@@ -441,7 +441,7 @@
   val foo : int -> int -> int -> unit
   val main : int
   $ ./anf_runner.exe < manytests/typed/007order.ml
-  let _start () () a () b _c () d __ = let anf0 = ( + ) a b in
+  let _start_ac0 () () a () b _c () d __ = let anf0 = ( + ) a b in
   let () = print_int anf0 in
   let () = print_int __ in
   let anf2 = ( * ) a b in
@@ -455,7 +455,7 @@
   let anf7 = print_int 4 in
   let anf8 = print_int 2 in
   let anf9 = print_int 1 in
-  let anf3 = _start anf9 anf8 3 anf7 100 1000 anf5 10000 anf4 in
+  let anf3 = _start_ac0 anf9 anf8 3 anf7 100 1000 anf5 10000 anf4 in
   print_int anf3
   ;;
   
@@ -464,7 +464,7 @@
   val main : unit
   
   Типы после приведения в ANF:
-  val _start : unit -> unit -> int -> unit -> int -> int -> unit -> int -> int -> int
+  val _start_ac0 : unit -> unit -> int -> unit -> int -> int -> unit -> int -> int -> int
   val main : unit
   $ ./anf_runner.exe < manytests/typed/008ascription.ml
   let addi f g x = let anf0 = g x in
@@ -476,7 +476,7 @@
   else ( * ) x 2
   ;;
   
-  let lam_ll1 _start = let anf1 = ( / ) _start 2 in
+  let lam_ll1 _start_ac0 = let anf1 = ( / ) _start_ac0 2 in
   ( = ) anf1 0
   ;;
   
