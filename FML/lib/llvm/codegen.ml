@@ -5,12 +5,14 @@
 open Llvm
 open Anf_ast
 
-let sym_to_value : (string, llvalue) Hashtbl.t = Hashtbl.create 10
-let sym_to_type : (string, lltype) Hashtbl.t = Hashtbl.create 10
-let lookup_name name = Hashtbl.find_opt sym_to_value name
-let lookup_type name = Hashtbl.find_opt sym_to_type name
-let add_sym name value = Hashtbl.add sym_to_value name value
-let add_type name ty = Hashtbl.add sym_to_type name ty
+module StrMap = struct
+  open Base
+
+  let empty = Map.empty (module String)
+  let update = Map.update
+  let find = Map.find
+end
+
 let ctx = global_context ()
 let builder = builder ctx
 let module_ = create_module ctx "FML"
@@ -34,7 +36,7 @@ let get_rt_name = function
   | other -> other
 ;;
 
-let compile_immexpr = function
+let compile_immexpr env = function
   | ImmInt n -> const_int i64_t n
   | ImmBool b -> const_int i64_t (Bool.to_int b)
   | ImmUnit -> const_int i64_t 0
@@ -51,9 +53,9 @@ let compile_immexpr = function
          builder
      | None ->
        (match lookup_global name module_ with
-        | Some g -> g
+        | Some g -> build_load i64_t g "global" builder
         | None ->
-          (match lookup_name name with
+          (match StrMap.find env name with
            | Some v -> v
            | None -> failwith ("Unknown variable: " ^ name))))
   | _ -> failwith "Not_implemented"
@@ -106,20 +108,20 @@ let compile_binop op x y =
   | _ -> failwith ("Invalid operator: " ^ op)
 ;;
 
-let rec compile_cexpr = function
-  | CImmExpr imm -> compile_immexpr imm
+let rec compile_cexpr env = function
+  | CImmExpr imm -> compile_immexpr env imm
   | CEApply (name, [ arg1 ]) when is_unnop name ->
-    compile_unnop name (compile_immexpr arg1)
+    compile_unnop name (compile_immexpr env arg1)
   | CEApply (name, [ arg1; arg2 ]) when is_binop name ->
-    compile_binop name (compile_immexpr arg1) (compile_immexpr arg2)
+    compile_binop name (compile_immexpr env arg1) (compile_immexpr env arg2)
   | CEApply (name, args) ->
-    let compiled_args = List.map compile_immexpr args in
+    let compiled_args = List.map (compile_immexpr env) args in
     (match lookup_function name module_ with
      | Some f when Array.length (params f) = List.length args ->
        let func_type = function_type i64_t (Array.make (List.length args) i64_t) in
        build_call func_type f (Array.of_list compiled_args) "call" builder
      | _ ->
-       let f = compile_immexpr (ImmIdentifier name) in
+       let f = compile_immexpr env (ImmIdentifier name) in
        build_call
          (var_arg_function_type i64_t [| i64_t; i64_t |])
          (Option.get (lookup_function "apply_args" module_))
@@ -129,17 +131,17 @@ let rec compile_cexpr = function
          builder)
   | CEIf (cond, then_e, else_e) ->
     let cond_v =
-      build_icmp Icmp.Ne (compile_immexpr cond) (const_int i64_t 0) "cond_v" builder
+      build_icmp Icmp.Ne (compile_immexpr env cond) (const_int i64_t 0) "cond_v" builder
     in
     let entry_block = insertion_block builder in
     let parent = block_parent entry_block in
     let then_block = append_block ctx "then" parent in
     position_at_end then_block builder;
-    let then_ = compile_aexpr then_e in
+    let then_ = compile_aexpr env then_e in
     let new_then_block = insertion_block builder in
     let else_block = append_block ctx "else" parent in
     position_at_end else_block builder;
-    let else_ = compile_aexpr else_e in
+    let else_ = compile_aexpr env else_e in
     let new_else_block = insertion_block builder in
     let merge_bb = append_block ctx "merge" parent in
     position_at_end merge_bb builder;
@@ -154,12 +156,11 @@ let rec compile_cexpr = function
     phi
   | _ -> failwith "Not implemented"
 
-and compile_aexpr = function
-  | ACExpr e -> compile_cexpr e
+and compile_aexpr env = function
+  | ACExpr e -> compile_cexpr env e
   | ALetIn (name, cexpr, aexpr) ->
-    let v = compile_cexpr cexpr in
-    add_sym name v;
-    compile_aexpr aexpr
+    let v = compile_cexpr env cexpr in
+    compile_aexpr (StrMap.update env name ~f:(fun _ -> v)) aexpr
 ;;
 
 let declare_func name args =
@@ -172,13 +173,13 @@ let compile_anf_binding (ALet (name, args, body)) =
   let func = declare_func name args in
   let bb = append_block ctx "entry" func in
   position_at_end bb builder;
-  List.iteri
-    (fun i arg_name ->
+  let _, env =
+    Base.List.fold args ~init:(0, StrMap.empty) ~f:(fun (i, env) arg_name ->
       let arg_value = param func i in
       set_value_name arg_name arg_value;
-      add_sym arg_name arg_value)
-    args;
-  let body_val = compile_aexpr body in
+      i + 1, StrMap.update env arg_name ~f:(fun _ -> arg_value))
+  in
+  let body_val = compile_aexpr env body in
   let _ = build_ret body_val builder in
   ignore func
 ;;
@@ -190,9 +191,8 @@ let compile_anf_decl = function
     List.iter (fun (ALet (name, args, _)) -> ignore (declare_func name args)) bindings;
     List.iter (fun binding -> ignore (compile_anf_binding binding)) bindings
   | Based_value (name, body) ->
-    let body = compile_aexpr body in
-    let gvar = define_global name (const_int i64_t 0) module_ in
-    ignore (build_store body gvar builder)
+    let body = compile_aexpr StrMap.empty body in
+    ignore (define_global name body module_)
 ;;
 
 let init_runtime =

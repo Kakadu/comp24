@@ -9,10 +9,25 @@ module StrMap = struct
 
   let empty = Map.empty (module String)
   let singleton str = Map.singleton (module String) str
-  let add = Map.add
   let update = Map.update
   let find = Map.find
   let merge_two fst snd = Map.merge_skewed fst snd ~combine:(fun ~key:_ _ v2 -> v2)
+end
+
+module StrSet = struct
+  open Base
+
+  type t = (string, String.comparator_witness) Set.t
+
+  let add = Set.add
+  let empty = Set.empty (module String)
+  let singleton str = Set.singleton (module String) str
+  let union = Set.union
+  let to_list = Set.to_list
+  let of_list = Set.of_list (module String)
+  let diff = Set.diff
+  let union_list lst = Set.union_list (module String) lst
+  let find = Set.mem
 end
 
 let builtins =
@@ -40,23 +55,6 @@ let builtins =
   ; "_start"
   ]
 ;;
-
-module StrSet = struct
-  open Base
-
-  type t = (string, String.comparator_witness) Set.t
-
-  let add = Set.add
-  let empty = Set.empty (module String)
-  let singleton str = Set.singleton (module String) str
-  let union = Set.union
-  let to_list = Set.to_list
-  let of_list = Set.of_list (module String)
-  let fold = Set.fold
-  let diff = Set.diff
-  let union_list lst = Set.union_list (module String) lst
-  let find = Set.mem
-end
 
 module StateMonad : sig
   include Base.Monad.Infix
