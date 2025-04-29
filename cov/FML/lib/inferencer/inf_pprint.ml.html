@@ -254,63 +254,63 @@
 open Typedtree
 
 let recalculate_vars typ =
-  <span data-count="155">l</span>et insert (old_v, new_v) acc =
-    <span data-count="251">m</span>atch Base.Map.find acc old_v with
-    | <span data-count="131">S</span>ome _ -&gt; new_v, acc
-    | <span data-count="120">N</span>one -&gt; new_v + 1, Base.Map.updat<span data-count="120">e</span> acc old_v ~f:(fun _ -&gt; <span data-count="120">n</span>ew_v)
+  <span data-count="226">l</span>et insert (old_v, new_v) acc =
+    <span data-count="376">m</span>atch Base.Map.find acc old_v with
+    | <span data-count="203">S</span>ome _ -&gt; new_v, acc
+    | <span data-count="173">N</span>one -&gt; new_v + 1, Base.Map.updat<span data-count="173">e</span> acc old_v ~f:(fun _ -&gt; <span data-count="173">n</span>ew_v)
   in
   let new_vars =
     let rec helper (last_v, acc) = function
-      | <span data-count="251">T</span>Var n -&gt; insert (n, last_v) acc
-      | <span data-count="49">T</span>List t -&gt; helper (last_v, acc) t
-      | <span data-count="21">T</span>Tuple l -&gt; List.fold_left helper (last_v, acc) l
-      | <span data-count="311">T</span>Function (l, r) -&gt;
+      | <span data-count="376">T</span>Var n -&gt; insert (n, last_v) acc
+      | <span data-count="73">T</span>List t -&gt; helper (last_v, acc) t
+      | <span data-count="33">T</span>Tuple l -&gt; List.fold_left helper (last_v, acc) l
+      | <span data-count="483">T</span>Function (l, r) -&gt;
         let new_last_v, new_acc = helper (last_v, acc) l in
-        <span data-count="311">h</span>elper (new_last_v, new_acc) r
-      | <span data-count="204">T</span>Int | <span data-count="10">T</span>Bool | <span data-count="22">T</span>Unit -&gt; last_v, acc
+        <span data-count="483">h</span>elper (new_last_v, new_acc) r
+      | <span data-count="313">T</span>Int | <span data-count="13">T</span>Bool | <span data-count="40">T</span>Unit -&gt; last_v, acc
     in
-    let _, res = helper (0, Base.Map.empt<span data-count="155">y</span> (module Base.Int)) typ in
-    <span data-count="155">r</span>es
+    let _, res = helper (0, Base.Map.empt<span data-count="226">y</span> (module Base.Int)) typ in
+    <span data-count="226">r</span>es
   in
   let rec helper = function
-    | <span data-count="251">T</span>Var n -&gt; tvar (Base.Map.find_ex<span data-count="251">n</span> new_vars n)
-    | <span data-count="49">T</span>List t -&gt; tlist (helpe<span data-count="49">r</span> t)
-    | <span data-count="21">T</span>Tuple l -&gt; ttuple (List.ma<span data-count="21">p</span> helper l)
-    | <span data-count="311">T</span>Function (l, r) -&gt; tfunction (helpe<span data-count="311">r</span> l) (helpe<span data-count="311">r</span> r)
-    | <span data-count="236">o</span>ther -&gt; other
+    | <span data-count="376">T</span>Var n -&gt; tvar (Base.Map.find_ex<span data-count="376">n</span> new_vars n)
+    | <span data-count="73">T</span>List t -&gt; tlist (helpe<span data-count="73">r</span> t)
+    | <span data-count="33">T</span>Tuple l -&gt; ttuple (List.ma<span data-count="33">p</span> helper l)
+    | <span data-count="483">T</span>Function (l, r) -&gt; tfunction (helpe<span data-count="483">r</span> l) (helpe<span data-count="483">r</span> r)
+    | <span data-count="366">o</span>ther -&gt; other
   in
   helper typ
 ;;
 
 let pp_type ppf typ =
-  <span data-count="155">l</span>et rec helper ppf = function
-    | <span data-count="22">T</span>Unit -&gt; Format.fprintf ppf "unit"
-    | <span data-count="204">T</span>Int -&gt; Format.fprintf ppf "int"
-    | <span data-count="10">T</span>Bool -&gt; Format.fprintf ppf "bool"
-    | <span data-count="251">T</span>Var v -&gt;
-      let var_name = Char.chr (Char.cod<span data-count="251">e</span> 'a' + v) in
-      <span data-count="251">F</span>ormat.fprintf ppf "'%c" var_name
-    | <span data-count="311">T</span>Function (l, r) -&gt;
+  <span data-count="226">l</span>et rec helper ppf = function
+    | <span data-count="40">T</span>Unit -&gt; Format.fprintf ppf "unit"
+    | <span data-count="313">T</span>Int -&gt; Format.fprintf ppf "int"
+    | <span data-count="13">T</span>Bool -&gt; Format.fprintf ppf "bool"
+    | <span data-count="376">T</span>Var v -&gt;
+      let var_name = Char.chr (Char.cod<span data-count="376">e</span> 'a' + v) in
+      <span data-count="376">F</span>ormat.fprintf ppf "'%c" var_name
+    | <span data-count="483">T</span>Function (l, r) -&gt;
       (match l with
-       | <span data-count="50">T</span>Function (_, _) -&gt; Format.fprintf ppf "(%a) -&gt; %a" helper l helper r
-       | <span data-count="261">_</span> -&gt; Format.fprintf ppf "%a -&gt; %a" helper l helper r)
-    | <span data-count="49">T</span>List t -&gt;
+       | <span data-count="81">T</span>Function (_, _) -&gt; Format.fprintf ppf "(%a) -&gt; %a" helper l helper r
+       | <span data-count="402">_</span> -&gt; Format.fprintf ppf "%a -&gt; %a" helper l helper r)
+    | <span data-count="73">T</span>List t -&gt;
       (match t with
        | <span data-count="1">T</span>Function (_, _) -&gt; Format.fprintf ppf "(%a) list" helper t
-       | <span data-count="48">_</span> -&gt; Format.fprintf ppf "%a list" helper t)
-    | <span data-count="21">T</span>Tuple tl -&gt;
+       | <span data-count="72">_</span> -&gt; Format.fprintf ppf "%a list" helper t)
+    | <span data-count="33">T</span>Tuple tl -&gt;
       Format.fprintf
         ppf
         "%a"
-        (Format.pp_print_lis<span data-count="21">t</span>
-           ~pp_sep:(fun ppf () -&gt; <span data-count="21">F</span>ormat.fprintf ppf " * ")
+        (Format.pp_print_lis<span data-count="33">t</span>
+           ~pp_sep:(fun ppf () -&gt; <span data-count="33">F</span>ormat.fprintf ppf " * ")
            (fun ppf ty -&gt;
-             <span data-count="42">m</span>atch ty with
-             | <span data-count="0">T</span>Tuple _ | <span data-count="18">T</span>Function _ -&gt; Format.fprintf ppf "(%a)" helper ty
-             | <span data-count="24">_</span> -&gt; helper ppf ty))
+             <span data-count="66">m</span>atch ty with
+             | <span data-count="0">T</span>Tuple _ | <span data-count="32">T</span>Function _ -&gt; Format.fprintf ppf "(%a)" helper ty
+             | <span data-count="34">_</span> -&gt; helper ppf ty))
         tl
   in
-  helper ppf (recalculate_var<span data-count="155">s</span> typ)
+  helper ppf (recalculate_var<span data-count="226">s</span> typ)
 ;;
 
 let pp_error ppf = function
@@ -345,15 +345,15 @@ let print_inferencer_error e =
   <span data-count="9">F</span>ormat.printf "%s\n" error_str
 ;;
 
-let type_to_string typ = <span data-count="147">F</span>ormat.asprintf "%a" pp_type typ
+let type_to_string typ = <span data-count="218">F</span>ormat.asprintf "%a" pp_type typ
 let expr_without_name typ = <span data-count="0">"</span>- : " ^ type_to_strin<span data-count="0">g</span> typ
-let expr_with_name name typ = <span data-count="147">S</span>tring.concat " " [ "val"; name; ":"; type_to_strin<span data-count="147">g</span> typ ]
+let expr_with_name name typ = <span data-count="218">S</span>tring.concat " " [ "val"; name; ":"; type_to_strin<span data-count="218">g</span> typ ]
 let print_expr_type typ = <span data-count="0">F</span>ormat.printf "%s\n" (expr_without_nam<span data-count="0">e</span> typ)
 
 let print_program_type env names_list =
-  <span data-count="43">B</span>ase.List.iter names_list ~f:(fun name -&gt;
-    <span data-count="147">l</span>et (Scheme (_, ty)) = Base.Map.find_exn env name in
-    <span data-count="147">F</span>ormat.printf "%s\n" (expr_with_nam<span data-count="147">e</span> name ty))
+  <span data-count="70">B</span>ase.List.iter names_list ~f:(fun name -&gt;
+    <span data-count="218">l</span>et (Scheme (_, ty)) = Base.Map.find_exn env name in
+    <span data-count="218">F</span>ormat.printf "%s\n" (expr_with_nam<span data-count="218">e</span> name ty))
 ;;
 </code></pre>
       </div>
