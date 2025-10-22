@@ -5,6 +5,9 @@
  (libraries fml_lib stdio))
 
 (cram
+ (deps manytests/typed/x013.ml))
+
+(cram
  (applies_to bitecode)
  (deps
   ./compiler.exe
@@ -53,6 +56,7 @@
   manytests/typed/009let_poly.ml
   manytests/typed/011mapcps.ml
   manytests/typed/012fibcps.ml
+  ; manytests/typed/x013.ml
   manytests/typed/013foldfoldr.ml
   manytests/typed/015tuples.ml
   manytests/typed/016lists.ml))

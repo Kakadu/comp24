@@ -49,6 +49,13 @@
   8
 
   $ ./compiler.exe < manytests/typed/012fibcps.ml
-  $ clang-16 out.ll ../lib/llvm/runtime.o -lffi -o 012fibcps
-  $ ./012fibcps
+  $ clang-16 out.ll ../lib/llvm/runtime.o -lffi -o 012fibcps && rm out.ll
+  $ ./012fibcps && rm -f out.ll
   8
+
+$ ls manytests/typed
+  $ ocaml -w -26 manytests/typed/x013.ml
+
+  $ ./compiler.exe < manytests/typed/x013.ml
+  $ clang-16 out.ll ../lib/llvm/runtime.o -lffi -o 013
+
