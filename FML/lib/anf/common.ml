@@ -52,6 +52,8 @@ let builtins =
   ; "hd_list_get"
   ; "tl_list_get"
   ; "fail_match"
+  ; "apply_args"
+  ; "new_closure"
   ; "_start"
   ]
 ;;

@@ -55,7 +55,11 @@
 
 $ ls manytests/typed
   $ ocaml -w -26 manytests/typed/x013.ml
+  1111111111
 
   $ ./compiler.exe < manytests/typed/x013.ml
   $ clang-16 out.ll ../lib/llvm/runtime.o -lffi -o 013
+  $ ./013
+  1111111111
+
 
