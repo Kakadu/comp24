@@ -54,10 +54,10 @@
   8
 
 $ ls manytests/typed
-  $ ocaml -w -26 ./x013.ml
+  $ ocaml -w -26 ./x013.ml_test.txt
   1111111111
 
-  $ ./compiler.exe < ./x013.ml
+  $ ./compiler.exe < ./x013.ml_test.txt
   $ clang-16 out.ll ../lib/llvm/runtime.o -lffi -o 013
   $ ./013
   1111111111

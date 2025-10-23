@@ -5,7 +5,7 @@
  (libraries fml_lib stdio))
 
 (cram
- (deps ./x013.ml))
+ (deps ./x013.ml_test.txt))
 
 (cram
  (applies_to bitecode)
