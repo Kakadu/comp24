@@ -10,18 +10,18 @@ type const =
 [@@deriving show { with_path = false }]
 
 type rec_flag =
-  | Rec
-  | NoRec
+  | Rec (** rec *)
+  | NoRec (** no rec annotation *)
 [@@deriving show { with_path = false }]
 
 type type_annotation =
-  | AUnit
-  | AInt
-  | ABool
-  | AVar of int
-  | AList of type_annotation
-  | ATuple of type_annotation list
-  | AFunction of type_annotation * type_annotation
+  | AUnit (** : unit *)
+  | AInt (** : int *)
+  | ABool (** : bool *)
+  | AVar of int (** 'a *)
+  | AList of type_annotation (** : 'a list *)
+  | ATuple of type_annotation list (** : 'a * 'b *)
+  | AFunction of type_annotation * type_annotation (** : 'a -> 'b *)
 [@@deriving show { with_path = false }]
 
 type pattern =
@@ -32,58 +32,57 @@ type pattern =
   | PIdentifier of id (** x *)
   | PTuple of pattern list (** (x, y, z) *)
   | PCons of pattern * pattern (** hd :: tl*)
-  | PConstraint of pattern * type_annotation
+  | PConstraint of pattern * type_annotation (** P : type annotation *)
 [@@deriving show { with_path = false }]
 
 type expression =
-  | EUnit
-  | ENill
-  | EConstraint of expression * type_annotation
-  | EConst of const
-  | EIdentifier of id
+  | EUnit (** () *)
+  | ENill (** [] *)
+  | EConstraint of expression * type_annotation (** E : type annotation *)
+  | EConst of const (** 1 || true*)
+  | EIdentifier of id (** x *)
   | EApplication of expression * expression (** E1 E2*)
   | EFun of pattern * expression (** fun P -> E*)
   | ELetIn of rec_flag * pattern * expression * expression (** let f x = E1 *)
-  | ETuple of expression list
+  | ETuple of expression list (** (E1, E2, E3) *)
   | EIf of expression * expression * expression (** if e1 then e2 else e3 *)
   | ECons of expression * expression (** [a; b; c], a :: [b; c]*)
   | EMatch of expression * (pattern * expression) list
   (** match e with p1 -> e1 |...| pn -> en *)
 [@@deriving show { with_path = false }]
 
-type single_declaration = DDeclaration of pattern * expression
+type single_declaration = DDeclaration of pattern * expression (** P = E*)
 [@@deriving show { with_path = false }]
 
 type declaration =
   | NoRecDecl of single_declaration list
+  (** let single_declaration (and single_declaration) *)
   | RecDecl of single_declaration list
+  (** let rec single_declaration (and single_declaration) *)
 [@@deriving show { with_path = false }]
 
+(** declaration;; declaration *)
 type program = declaration list [@@deriving show { with_path = false }]
 
-let cint x = CInt x
-let cbool x = CBool x
-
 (* Constructors for patterns *)
-let pany _ = PAny
-let pnill _ = PNill
-let punit _ = PUnit
-let pconst c = PConst c
-let pident v = PIdentifier v
-let pcons l r = PCons (l, r)
-let ptuple l = PTuple l
-let pconstraint p t = PConstraint (p, t)
-
-(* ------------------------- *)
+val cint : int -> const
+val cbool : bool -> const
+val pany : 'a -> pattern
+val pnill : 'a -> pattern
+val punit : 'a -> pattern
+val pident : id -> pattern
+val pconst : const -> pattern
+val pcons : pattern -> pattern -> pattern
+val ptuple : pattern list -> pattern
+val pconstraint : pattern -> type_annotation -> pattern
 
 (* Constructors for expressions *)
 
-let econst c = EConst c
-let eidentifier v = EIdentifier v
-let etuple l = ETuple l
-let efun arg expr = EFun (arg, expr)
-let econstraint e t = EConstraint (e, t)
-(* ---------------------------- *)
+val econst : const -> expression
+val eidentifier : id -> expression
+val etuple : expression list -> expression
+val efun : pattern -> expression -> expression
+val econstraint : expression -> type_annotation -> expression
 
 (* Constructor for declaration *)
-let ddeclaration pat expr = DDeclaration (pat, expr)
+val ddeclaration : pattern -> expression -> single_declaration

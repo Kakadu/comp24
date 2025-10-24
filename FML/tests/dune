@@ -20,6 +20,36 @@
  (modules inferencer_runner)
  (libraries fml_lib stdio))
 
+(executable
+ (name a_conv_runner)
+ (public_name a_conv_runner)
+ (modules a_conv_runner)
+ (libraries fml_lib stdio))
+
+(executable
+ (name c_conv_runner)
+ (public_name c_conv_runner)
+ (modules c_conv_runner)
+ (libraries fml_lib stdio))
+
+(executable
+ (name match_elimination_runner)
+ (public_name match_elimination_runner)
+ (modules match_elimination_runner)
+ (libraries fml_lib stdio))
+
+(executable
+ (name lambda_lift_runner)
+ (public_name lambda_lift_runner)
+ (modules lambda_lift_runner)
+ (libraries fml_lib stdio))
+
+(executable
+ (name anf_runner)
+ (public_name anf_runner)
+ (modules anf_runner)
+ (libraries fml_lib stdio))
+
 (cram
  (applies_to parser_manytests)
  (deps
@@ -40,7 +70,9 @@
   manytests/typed/007order.ml
   manytests/typed/008ascription.ml
   manytests/typed/009let_poly.ml
-  manytests/typed/010sukharev.ml
+  manytests/typed/011mapcps.ml
+  manytests/typed/012fibcps.ml
+  manytests/typed/013foldfoldr.ml
   manytests/typed/015tuples.ml
   manytests/typed/016lists.ml))
 
@@ -64,6 +96,164 @@
   manytests/typed/007order.ml
   manytests/typed/008ascription.ml
   manytests/typed/009let_poly.ml
-  manytests/typed/010sukharev.ml
+  manytests/typed/011mapcps.ml
+  manytests/typed/012fibcps.ml
+  manytests/typed/013foldfoldr.ml
+  manytests/typed/015tuples.ml
+  manytests/typed/016lists.ml))
+
+(cram
+ (applies_to a_conv_manytest)
+ (deps
+  ./a_conv_runner.exe
+  manytests/do_not_type/001.ml
+  manytests/do_not_type/002if.ml
+  manytests/do_not_type/003occurs.ml
+  manytests/do_not_type/004let_poly.ml
+  manytests/do_not_type/015tuples.ml
+  manytests/typed/001fac.ml
+  manytests/typed/002fac.ml
+  manytests/typed/003fib.ml
+  manytests/typed/004manyargs.ml
+  manytests/typed/005fix.ml
+  manytests/typed/006partial.ml
+  manytests/typed/006partial2.ml
+  manytests/typed/006partial3.ml
+  manytests/typed/007order.ml
+  manytests/typed/008ascription.ml
+  manytests/typed/009let_poly.ml
+  manytests/typed/011mapcps.ml
+  manytests/typed/012fibcps.ml
+  manytests/typed/013foldfoldr.ml
+  manytests/typed/015tuples.ml
+  manytests/typed/016lists.ml))
+
+(cram
+ (applies_to c_conv_manytest)
+ (deps
+  ./c_conv_runner.exe
+  manytests/do_not_type/001.ml
+  manytests/do_not_type/002if.ml
+  manytests/do_not_type/003occurs.ml
+  manytests/do_not_type/004let_poly.ml
+  manytests/do_not_type/015tuples.ml
+  manytests/typed/001fac.ml
+  manytests/typed/002fac.ml
+  manytests/typed/003fib.ml
+  manytests/typed/004manyargs.ml
+  manytests/typed/005fix.ml
+  manytests/typed/006partial.ml
+  manytests/typed/006partial2.ml
+  manytests/typed/006partial3.ml
+  manytests/typed/007order.ml
+  manytests/typed/008ascription.ml
+  manytests/typed/009let_poly.ml
+  manytests/typed/011mapcps.ml
+  manytests/typed/012fibcps.ml
+  manytests/typed/013foldfoldr.ml
+  manytests/typed/015tuples.ml
+  manytests/typed/016lists.ml))
+
+(cram
+ (applies_to lambda_lifting_manytests)
+ (deps
+  ./lambda_lifting_runner.exe
+  manytests/do_not_type/001.ml
+  manytests/do_not_type/002if.ml
+  manytests/do_not_type/003occurs.ml
+  manytests/do_not_type/004let_poly.ml
+  manytests/do_not_type/015tuples.ml
+  manytests/typed/001fac.ml
+  manytests/typed/002fac.ml
+  manytests/typed/003fib.ml
+  manytests/typed/004manyargs.ml
+  manytests/typed/005fix.ml
+  manytests/typed/006partial.ml
+  manytests/typed/006partial2.ml
+  manytests/typed/006partial3.ml
+  manytests/typed/007order.ml
+  manytests/typed/008ascription.ml
+  manytests/typed/009let_poly.ml
+  manytests/typed/011mapcps.ml
+  manytests/typed/012fibcps.ml
+  manytests/typed/013foldfoldr.ml
+  manytests/typed/015tuples.ml
+  manytests/typed/016lists.ml))
+
+(cram
+ (applies_to match_elimination_manytest)
+ (deps
+  ./match_elimination_runner.exe
+  manytests/do_not_type/001.ml
+  manytests/do_not_type/002if.ml
+  manytests/do_not_type/003occurs.ml
+  manytests/do_not_type/004let_poly.ml
+  manytests/do_not_type/015tuples.ml
+  manytests/typed/001fac.ml
+  manytests/typed/002fac.ml
+  manytests/typed/003fib.ml
+  manytests/typed/004manyargs.ml
+  manytests/typed/005fix.ml
+  manytests/typed/006partial.ml
+  manytests/typed/006partial2.ml
+  manytests/typed/006partial3.ml
+  manytests/typed/007order.ml
+  manytests/typed/008ascription.ml
+  manytests/typed/009let_poly.ml
+  manytests/typed/011mapcps.ml
+  manytests/typed/012fibcps.ml
+  manytests/typed/013foldfoldr.ml
+  manytests/typed/015tuples.ml
+  manytests/typed/016lists.ml))
+
+(cram
+ (applies_to lambda_lift_manytest)
+ (deps
+  ./lambda_lift_runner.exe
+  manytests/do_not_type/001.ml
+  manytests/do_not_type/002if.ml
+  manytests/do_not_type/003occurs.ml
+  manytests/do_not_type/004let_poly.ml
+  manytests/do_not_type/015tuples.ml
+  manytests/typed/001fac.ml
+  manytests/typed/002fac.ml
+  manytests/typed/003fib.ml
+  manytests/typed/004manyargs.ml
+  manytests/typed/005fix.ml
+  manytests/typed/006partial.ml
+  manytests/typed/006partial2.ml
+  manytests/typed/006partial3.ml
+  manytests/typed/007order.ml
+  manytests/typed/008ascription.ml
+  manytests/typed/009let_poly.ml
+  manytests/typed/011mapcps.ml
+  manytests/typed/012fibcps.ml
+  manytests/typed/013foldfoldr.ml
+  manytests/typed/015tuples.ml
+  manytests/typed/016lists.ml))
+
+(cram
+ (applies_to anf_manytest)
+ (deps
+  ./anf_runner.exe
+  manytests/do_not_type/001.ml
+  manytests/do_not_type/002if.ml
+  manytests/do_not_type/003occurs.ml
+  manytests/do_not_type/004let_poly.ml
+  manytests/do_not_type/015tuples.ml
+  manytests/typed/001fac.ml
+  manytests/typed/002fac.ml
+  manytests/typed/003fib.ml
+  manytests/typed/004manyargs.ml
+  manytests/typed/005fix.ml
+  manytests/typed/006partial.ml
+  manytests/typed/006partial2.ml
+  manytests/typed/006partial3.ml
+  manytests/typed/007order.ml
+  manytests/typed/008ascription.ml
+  manytests/typed/009let_poly.ml
+  manytests/typed/011mapcps.ml
+  manytests/typed/012fibcps.ml
+  manytests/typed/013foldfoldr.ml
   manytests/typed/015tuples.ml
   manytests/typed/016lists.ml))

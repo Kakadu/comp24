@@ -3,9 +3,24 @@
 (library
  (name fml_lib)
  (public_name FML.Lib)
- (modules Ast Parser Inf_errors Inf_pprint Inferencer Typedtree)
+ (modules
+  Ast
+  Parser
+  Inf_errors
+  Inf_pprint
+  Inferencer
+  Typedtree
+  Common
+  Me_ast
+  A_conv
+  C_conv
+  Match_elimination
+  Anf_ast
+  Anf
+  Lambda_lift
+  Codegen)
  (modules_without_implementation inf_errors)
- (libraries base angstrom)
+ (libraries base angstrom llvm llvm.analysis llvm.executionengine)
  (preprocess
   (pps ppx_deriving.show))
  (instrumentation

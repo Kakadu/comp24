@@ -1,4 +1,95 @@
-  $ ./parser_runner.exe < manytests/typed/001fac.ml
+  $ ./a_conv_runner.exe << EOF
+  > let is_empty x = x+1
+  > let rec length xs = match xs with
+  > | [] -> 0
+  > | _::tl -> 1 + length xs
+  > EOF
+  [(NoRecDecl
+      [(DDeclaration ((PIdentifier "is_empty_ac0"),
+          (EFun ((PIdentifier "x"),
+             (EApplication (
+                (EApplication ((EIdentifier "( + )"), (EIdentifier "x"))),
+                (EConst (CInt 1))))
+             ))
+          ))
+        ]);
+    (RecDecl
+       [(DDeclaration ((PIdentifier "length"),
+           (EFun ((PIdentifier "xs"),
+              (EMatch ((EIdentifier "xs"),
+                 [(PNill, (EConst (CInt 0)));
+                   ((PCons (PAny, (PIdentifier "tl"))),
+                    (EApplication (
+                       (EApplication ((EIdentifier "( + )"), (EConst (CInt 1))
+                          )),
+                       (EApplication ((EIdentifier "length"),
+                          (EIdentifier "xs")))
+                       )))
+                   ]
+                 ))
+              ))
+           ))
+         ])
+    ]
+
+  $ ./a_conv_runner.exe << EOF
+  > let fac n =
+  > let rec fack n k =
+  > if n<=1 then k 1
+  > else fack (n - 1) ((fun k n m -> k (m * n)) k n)
+  > in
+  > fack n (fun x -> x)
+  > EOF
+  [(NoRecDecl
+      [(DDeclaration ((PIdentifier "fac"),
+          (EFun ((PIdentifier "n"),
+             (ELetIn (Rec, (PIdentifier "fack"),
+                (EFun ((PIdentifier "n_ac0"),
+                   (EFun ((PIdentifier "k"),
+                      (EIf (
+                         (EApplication (
+                            (EApplication ((EIdentifier "( <= )"),
+                               (EIdentifier "n_ac0"))),
+                            (EConst (CInt 1)))),
+                         (EApplication ((EIdentifier "k"), (EConst (CInt 1)))),
+                         (EApplication (
+                            (EApplication ((EIdentifier "fack"),
+                               (EApplication (
+                                  (EApplication ((EIdentifier "( - )"),
+                                     (EIdentifier "n_ac0"))),
+                                  (EConst (CInt 1))))
+                               )),
+                            (EApplication (
+                               (EApplication (
+                                  (EFun ((PIdentifier "k_ac1"),
+                                     (EFun ((PIdentifier "n_ac2"),
+                                        (EFun ((PIdentifier "m"),
+                                           (EApplication (
+                                              (EIdentifier "k_ac1"),
+                                              (EApplication (
+                                                 (EApplication (
+                                                    (EIdentifier "( * )"),
+                                                    (EIdentifier "m"))),
+                                                 (EIdentifier "n_ac2")))
+                                              ))
+                                           ))
+                                        ))
+                                     )),
+                                  (EIdentifier "k"))),
+                               (EIdentifier "n_ac0")))
+                            ))
+                         ))
+                      ))
+                   )),
+                (EApplication (
+                   (EApplication ((EIdentifier "fack"), (EIdentifier "n"))),
+                   (EFun ((PIdentifier "x"), (EIdentifier "x")))))
+                ))
+             ))
+          ))
+        ])
+    ]
+  $ ./a_conv_runner.exe < manytests/typed/001fac.ml
   [(RecDecl
       [(DDeclaration ((PIdentifier "fac"),
           (EFun ((PIdentifier "n"),
@@ -30,7 +121,7 @@
          ])
     ]
 
-  $ ./parser_runner.exe < manytests/typed/002fac.ml
+  $ ./a_conv_runner.exe < manytests/typed/002fac.ml
   [(RecDecl
       [(DDeclaration ((PIdentifier "fac_cps"),
           (EFun ((PIdentifier "n"),
@@ -67,8 +158,8 @@
               (EApplication ((EIdentifier "print_int"),
                  (EApplication (
                     (EApplication ((EIdentifier "fac_cps"), (EConst (CInt 4)))),
-                    (EFun ((PIdentifier "print_int"), (EIdentifier "print_int")
-                       ))
+                    (EFun ((PIdentifier "print_int_ac0"),
+                       (EIdentifier "print_int_ac0")))
                     ))
                  )),
               (EConst (CInt 0))))
@@ -76,7 +167,7 @@
          ])
     ]
 
-  $ ./parser_runner.exe < manytests/typed/003fib.ml
+  $ ./a_conv_runner.exe < manytests/typed/003fib.ml
   [(RecDecl
       [(DDeclaration ((PIdentifier "fib_acc"),
           (EFun ((PIdentifier "a"),
@@ -160,7 +251,7 @@
          ])
     ]
 
-  $ ./parser_runner.exe < manytests/typed/004manyargs.ml
+  $ ./a_conv_runner.exe < manytests/typed/004manyargs.ml
   [(NoRecDecl
       [(DDeclaration ((PIdentifier "wrap"),
           (EFun ((PIdentifier "f"),
@@ -177,13 +268,13 @@
            (EFun ((PIdentifier "a"),
               (EFun ((PIdentifier "b"),
                  (EFun ((PIdentifier "c"),
-                    (ELetIn (NoRec, (PIdentifier "a"),
+                    (ELetIn (NoRec, (PIdentifier "a_ac0"),
                        (EApplication ((EIdentifier "print_int"),
                           (EIdentifier "a"))),
-                       (ELetIn (NoRec, (PIdentifier "b"),
+                       (ELetIn (NoRec, (PIdentifier "b_ac1"),
                           (EApplication ((EIdentifier "print_int"),
                              (EIdentifier "b"))),
-                          (ELetIn (NoRec, (PIdentifier "c"),
+                          (ELetIn (NoRec, (PIdentifier "c_ac2"),
                              (EApplication ((EIdentifier "print_int"),
                                 (EIdentifier "c"))),
                              (EConst (CInt 0))))
@@ -318,7 +409,7 @@
          ])
     ]
 
-  $ ./parser_runner.exe < manytests/typed/005fix.ml
+  $ ./a_conv_runner.exe < manytests/typed/005fix.ml
   [(RecDecl
       [(DDeclaration ((PIdentifier "fix"),
           (EFun ((PIdentifier "f"),
@@ -369,7 +460,7 @@
          ])
     ]
 
-  $ ./parser_runner.exe < manytests/typed/006partial.ml
+  $ ./a_conv_runner.exe < manytests/typed/006partial.ml
   [(NoRecDecl
       [(DDeclaration ((PIdentifier "foo"),
           (EFun ((PIdentifier "b"),
@@ -391,7 +482,7 @@
           ))
         ]);
     (NoRecDecl
-       [(DDeclaration ((PIdentifier "foo"),
+       [(DDeclaration ((PIdentifier "foo_ac0"),
            (EFun ((PIdentifier "x"),
               (EApplication (
                  (EApplication ((EIdentifier "foo"), (EConst (CBool true)))),
@@ -415,13 +506,13 @@
        [(DDeclaration ((PIdentifier "main"),
            (ELetIn (NoRec, PUnit,
               (EApplication ((EIdentifier "print_int"),
-                 (EApplication ((EIdentifier "foo"), (EConst (CInt 11)))))),
+                 (EApplication ((EIdentifier "foo_ac0"), (EConst (CInt 11)))))),
               (EConst (CInt 0))))
            ))
          ])
     ]
 
-  $ ./parser_runner.exe < manytests/typed/006partial2.ml
+  $ ./a_conv_runner.exe < manytests/typed/006partial2.ml
   [(NoRecDecl
       [(DDeclaration ((PIdentifier "foo"),
           (EFun ((PIdentifier "a"),
@@ -454,15 +545,15 @@
         ]);
     (NoRecDecl
        [(DDeclaration ((PIdentifier "main"),
-           (ELetIn (NoRec, (PIdentifier "foo"),
+           (ELetIn (NoRec, (PIdentifier "foo_ac0"),
               (EApplication ((EIdentifier "foo"), (EConst (CInt 1)))),
-              (ELetIn (NoRec, (PIdentifier "foo"),
-                 (EApplication ((EIdentifier "foo"), (EConst (CInt 2)))),
-                 (ELetIn (NoRec, (PIdentifier "foo"),
-                    (EApplication ((EIdentifier "foo"), (EConst (CInt 3)))),
+              (ELetIn (NoRec, (PIdentifier "foo_ac1"),
+                 (EApplication ((EIdentifier "foo_ac0"), (EConst (CInt 2)))),
+                 (ELetIn (NoRec, (PIdentifier "foo_ac2"),
+                    (EApplication ((EIdentifier "foo_ac1"), (EConst (CInt 3)))),
                     (ELetIn (NoRec, PUnit,
                        (EApplication ((EIdentifier "print_int"),
-                          (EIdentifier "foo"))),
+                          (EIdentifier "foo_ac2"))),
                        (EConst (CInt 0))))
                     ))
                  ))
@@ -470,7 +561,7 @@
            ))
          ])
     ]
-  $ ./parser_runner.exe < manytests/typed/006partial3.ml
+  $ ./a_conv_runner.exe < manytests/typed/006partial3.ml
   [(NoRecDecl
       [(DDeclaration ((PIdentifier "foo"),
           (EFun ((PIdentifier "a"),
@@ -502,9 +593,9 @@
            ))
          ])
     ]
-  $ ./parser_runner.exe < manytests/typed/007order.ml
+  $ ./a_conv_runner.exe < manytests/typed/007order.ml
   [(NoRecDecl
-      [(DDeclaration ((PIdentifier "_start"),
+      [(DDeclaration ((PIdentifier "_start_ac0"),
           (EFun (PUnit,
              (EFun (PUnit,
                 (EFun ((PIdentifier "a"),
@@ -568,7 +659,8 @@
                              (EApplication (
                                 (EApplication (
                                    (EApplication (
-                                      (EApplication ((EIdentifier "_start"),
+                                      (EApplication (
+                                         (EIdentifier "_start_ac0"),
                                          (EApplication (
                                             (EIdentifier "print_int"),
                                             (EConst (CInt 1))))
@@ -595,7 +687,7 @@
            ))
          ])
     ]
-  $ ./parser_runner.exe < manytests/typed/008ascription.ml
+  $ ./a_conv_runner.exe < manytests/typed/008ascription.ml
   [(NoRecDecl
       [(DDeclaration ((PIdentifier "addi"),
           (EFun ((PIdentifier "f"),
@@ -637,12 +729,12 @@
                                 ))
                              ))
                           )),
-                       (EFun ((PIdentifier "_start"),
+                       (EFun ((PIdentifier "_start_ac0"),
                           (EApplication (
                              (EApplication ((EIdentifier "( = )"),
                                 (EApplication (
                                    (EApplication ((EIdentifier "( / )"),
-                                      (EIdentifier "_start"))),
+                                      (EIdentifier "_start_ac0"))),
                                    (EConst (CInt 2))))
                                 )),
                              (EConst (CInt 0))))
@@ -655,7 +747,7 @@
          ])
     ]
 
-  $ ./parser_runner.exe < manytests/typed/009let_poly.ml
+  $ ./a_conv_runner.exe < manytests/typed/009let_poly.ml
   [(NoRecDecl
       [(DDeclaration ((PIdentifier "temp"),
           (ELetIn (NoRec, (PIdentifier "f"),
@@ -667,7 +759,8 @@
           ))
         ])
     ]
-  $ ./parser_runner.exe < manytests/typed/011mapcps.ml
+
+  $ ./a_conv_runner.exe < manytests/typed/011mapcps.ml
   [(RecDecl
       [(DDeclaration ((PIdentifier "map"),
           (EFun ((PIdentifier "f"),
@@ -681,12 +774,12 @@
                                (EApplication ((EIdentifier "map"),
                                   (EIdentifier "f"))),
                                (EIdentifier "tl"))),
-                            (EFun ((PIdentifier "tl"),
+                            (EFun ((PIdentifier "tl_ac0"),
                                (EApplication ((EIdentifier "k"),
                                   (ECons (
                                      (EApplication ((EIdentifier "f"),
                                         (EIdentifier "h"))),
-                                     (EIdentifier "tl")))
+                                     (EIdentifier "tl_ac0")))
                                   ))
                                ))
                             )))
@@ -741,7 +834,7 @@
            ))
          ])
     ]
-  $ ./parser_runner.exe < manytests/typed/012fibcps.ml
+  $ ./a_conv_runner.exe < manytests/typed/012fibcps.ml
   [(RecDecl
       [(DDeclaration ((PIdentifier "fib"),
           (EFun ((PIdentifier "n"),
@@ -792,7 +885,7 @@
            ))
          ])
     ]
-  $ ./parser_runner.exe < manytests/typed/013foldfoldr.ml
+  $ ./a_conv_runner.exe < manytests/typed/013foldfoldr.ml
   [(NoRecDecl
       [(DDeclaration ((PIdentifier "id"),
           (EFun ((PIdentifier "x"), (EIdentifier "x")))))
@@ -878,7 +971,8 @@
            ))
          ])
     ]
-  $ ./parser_runner.exe < manytests/typed/015tuples.ml
+
+  $ ./a_conv_runner.exe < manytests/typed/015tuples.ml
   [(RecDecl
       [(DDeclaration ((PIdentifier "fix"),
           (EFun ((PIdentifier "f"),
@@ -912,7 +1006,7 @@
               (EApplication (
                  (EApplication ((EIdentifier "fix"),
                     (EFun ((PIdentifier "self"),
-                       (EFun ((PIdentifier "l"),
+                       (EFun ((PIdentifier "l_ac0"),
                           (EApplication (
                              (EApplication ((EIdentifier "map"),
                                 (EFun ((PIdentifier "li"),
@@ -921,13 +1015,13 @@
                                          (EApplication ((EIdentifier "li"),
                                             (EApplication (
                                                (EIdentifier "self"),
-                                               (EIdentifier "l")))
+                                               (EIdentifier "l_ac0")))
                                             )),
                                          (EIdentifier "x")))
                                       ))
                                    ))
                                 )),
-                             (EIdentifier "l")))
+                             (EIdentifier "l_ac0")))
                           ))
                        ))
                     )),
@@ -1055,7 +1149,7 @@
          ])
     ]
 
-  $ ./parser_runner.exe < manytests/typed/016lists.ml
+  $ ./a_conv_runner.exe < manytests/typed/016lists.ml
   [(RecDecl
       [(DDeclaration ((PIdentifier "length"),
           (EFun ((PIdentifier "xs"),
@@ -1167,11 +1261,11 @@
               (EFun ((PIdentifier "ys"),
                  (EMatch ((EIdentifier "xs"),
                     [(PNill, (EIdentifier "ys"));
-                      ((PCons ((PIdentifier "x"), (PIdentifier "xs"))),
+                      ((PCons ((PIdentifier "x"), (PIdentifier "xs_ac0"))),
                        (ECons ((EIdentifier "x"),
                           (EApplication (
                              (EApplication ((EIdentifier "append"),
-                                (EIdentifier "xs"))),
+                                (EIdentifier "xs_ac0"))),
                              (EIdentifier "ys")))
                           )))
                       ]
@@ -1282,86 +1376,16 @@
          ])
     ]
  
-  $ ./parser_runner.exe < manytests/do_not_type/001.ml
-  [(NoRecDecl
-      [(DDeclaration ((PIdentifier "recfac"),
-          (EFun ((PIdentifier "n"),
-             (EIf (
-                (EApplication (
-                   (EApplication ((EIdentifier "( <= )"), (EIdentifier "n"))),
-                   (EConst (CInt 1)))),
-                (EConst (CInt 1)),
-                (EApplication (
-                   (EApplication ((EIdentifier "( * )"), (EIdentifier "n"))),
-                   (EApplication ((EIdentifier "fac"),
-                      (EApplication (
-                         (EApplication ((EIdentifier "( - )"),
-                            (EIdentifier "n"))),
-                         (EConst (CInt 1))))
-                      ))
-                   ))
-                ))
-             ))
-          ))
-        ])
-    ]
-  $ ./parser_runner.exe < manytests/do_not_type/002if.ml
-  [(NoRecDecl
-      [(DDeclaration ((PIdentifier "main"),
-          (EIf ((EConst (CBool true)), (EConst (CInt 1)),
-             (EConst (CBool false))))
-          ))
-        ])
-    ]
-  $ ./parser_runner.exe < manytests/do_not_type/003occurs.ml
-  [(NoRecDecl
-      [(DDeclaration ((PIdentifier "fix"),
-          (EFun ((PIdentifier "f"),
-             (EApplication (
-                (EFun ((PIdentifier "x"),
-                   (EApplication ((EIdentifier "f"),
-                      (EFun ((PIdentifier "f"),
-                         (EApplication (
-                            (EApplication ((EIdentifier "x"), (EIdentifier "x")
-                               )),
-                            (EIdentifier "f")))
-                         ))
-                      ))
-                   )),
-                (EFun ((PIdentifier "x"),
-                   (EApplication ((EIdentifier "f"),
-                      (EFun ((PIdentifier "f"),
-                         (EApplication (
-                            (EApplication ((EIdentifier "x"), (EIdentifier "x")
-                               )),
-                            (EIdentifier "f")))
-                         ))
-                      ))
-                   ))
-                ))
-             ))
-          ))
-        ])
-    ]
+  $ ./a_conv_runner.exe < manytests/do_not_type/001.ml
+  Infer error:
+  $ ./a_conv_runner.exe < manytests/do_not_type/002if.ml
+  Infer error:
+  $ ./a_conv_runner.exe < manytests/do_not_type/003occurs.ml
+  Infer error:
 
-  $ ./parser_runner.exe < manytests/do_not_type/004let_poly.ml
-  [(NoRecDecl
-      [(DDeclaration ((PIdentifier "temp"),
-          (EApplication (
-             (EFun ((PIdentifier "f"),
-                (ETuple
-                   [(EApplication ((EIdentifier "f"), (EConst (CInt 1))));
-                     (EApplication ((EIdentifier "f"), (EConst (CBool true))))])
-                )),
-             (EFun ((PIdentifier "x"), (EIdentifier "x")))))
-          ))
-        ])
-    ]
+  $ ./a_conv_runner.exe < manytests/do_not_type/004let_poly.ml
+  Infer error:
 
-  $ ./parser_runner.exe < manytests/do_not_type/015tuples.ml
-  [(RecDecl
-      [(DDeclaration ((PTuple [(PIdentifier "a"); (PIdentifier "b")]),
-          (ETuple [(EIdentifier "a"); (EIdentifier "b")])))
-        ])
-    ]
+  $ ./a_conv_runner.exe < manytests/do_not_type/015tuples.ml
+  Infer error:
 

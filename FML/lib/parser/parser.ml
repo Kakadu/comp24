@@ -50,7 +50,7 @@ let keyword s = skip_wspace *> string s <* skip_wspace1
 
 let chainl1 e op =
   let rec go acc = lift2 (fun f x -> f acc x) op e >>= go <|> return acc in
-  e >>= fun init -> go init
+  e >>= go
 ;;
 
 let rec chainr1 e op = e >>= fun a -> op >>= (fun f -> chainr1 e op >>| f a) <|> return a
@@ -63,7 +63,8 @@ let parse_name =
 let parse_identifier constr =
   parse_name
   >>= fun name ->
-  if ((not @@ is_keyword name) && is_lower name.[0]) || name.[0] = '_'
+  if ((not @@ is_keyword name) && is_lower name.[0])
+     || (name.[0] = '_' && String.length name > 1)
   then return @@ constr name
   else fail "Syntax error: invalid identifier name"
 ;;
@@ -84,6 +85,14 @@ let parse_primitive_type =
     ]
 ;;
 
+let parse_var_type =
+  parse_name
+  >>= fun name ->
+  if String.length name = 2 && name.[0] = '\'' && is_lower name.[1]
+  then return @@ AVar (int_of_char name.[1])
+  else fail "Syntax error."
+;;
+
 let parse_list_type p_type = p_type <* token "list" >>= fun l -> return @@ AList l
 
 let parse_tuple_type p_type =
@@ -97,7 +106,9 @@ let parse_function_type p_type =
 
 let parse_type =
   let typ =
-    fix @@ fun self -> choice [ parens self; parse_primitive_type; parse_list_type self ]
+    fix
+    @@ fun self ->
+    choice [ parens self; parse_primitive_type; parse_var_type; parse_list_type self ]
   in
   let typ = parse_tuple_type typ <|> typ in
   parse_function_type typ <|> typ
@@ -130,7 +141,7 @@ let parse_operators =
 (* ------------------------ *)
 
 (* Pattern parsers*)
-let parse_pany = token "_" *> skip_wspace1 >>| pany
+let parse_pany = token "_" >>| pany
 let parse_punit = token "(" *> token ")" >>| punit
 let parse_pidentifier = parse_operators >>| pident <|> parse_identifier pident
 let parse_pconst = parse_const pconst
@@ -152,11 +163,11 @@ let parse_pattern_wout_type =
   let patt =
     choice
       [ parens self
+      ; parse_pidentifier
       ; parse_pany
       ; parse_punit
       ; parse_pconst
       ; parse_pnill
-      ; parse_pidentifier
       ; parse_ptuple self
       ]
   in
